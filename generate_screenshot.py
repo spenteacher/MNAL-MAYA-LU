@@ -84,7 +84,7 @@ def generate_screenshot():
     pygame.draw.rect(screen, UI_BG, (0, y_offset, WIDTH, 150))
 
     stats = [
-        "LU: 0.842 ms/frame",
+        "LU: OJITO QUE ESTO ES UN PLACEHOLDERRRRR ªªªªªª !!!!!!!!!!!!!!",
         "Gauss: 2.156 ms/frame",
         "Speedup: 2.56x",
         "FPS: 60.0",

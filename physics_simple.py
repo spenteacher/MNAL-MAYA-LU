@@ -102,15 +102,15 @@ class EquilibriumSystem:
                     if p.pos[0] < 10:
                         p.pos[0] = 10
                         p.velocity[0] = abs(p.velocity[0]) * 0.3
-                    elif p.pos[0] > 590:
-                        p.pos[0] = 590
+                    elif p.pos[0] > 1100:
+                        p.pos[0] = 1100
                         p.velocity[0] = -abs(p.velocity[0]) * 0.3
 
                     if p.pos[1] < 10:
                         p.pos[1] = 10
                         p.velocity[1] = abs(p.velocity[1]) * 0.3
-                    elif p.pos[1] > 500:
-                        p.pos[1] = 500
+                    elif p.pos[1] > 1100:
+                        p.pos[1] = 1100
                         p.velocity[1] = -abs(p.velocity[1]) * 0.3
 
                     # Verificar que la posición sea válida
