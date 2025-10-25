@@ -243,6 +243,47 @@ class Simulator:
             surf = self.font.render(info, True, ACCENT_COLOR)
             self.screen.blit(surf, (WIDTH//2 - 180, y_offset + 5))
 
+        self.draw_performance_graph(y_offset)
+
+    def draw_performance_graph(self, y_offset):
+        """Dibujar gráfica de rendimiento en tiempo real"""
+        graph_x, graph_y = 500, y_offset + 20
+        graph_width, graph_height = 250, 80
+
+        # Fondo de la gráfica
+        pygame.draw.rect(self.screen, (30, 30, 40), (graph_x, graph_y, graph_width, graph_height))
+
+        # Si hay suficientes datos
+        if len(self.frame_times_lu) > 1 and len(self.frame_times_gauss) > 1:
+            # Obtener los últmos 100 valores
+            num_points = min(100, len(self.frame_times_lu))
+            lu_data = self.frame_times_lu[-num_points:]
+            gauss_data = self.frame_times_gauss[-num_points:]
+
+            # Escala FIJA: siempre usar 5ms como máximo
+            max_val = 5.0  # Escala fija en milisegundos
+
+            # Crear puntos para las líneas
+            points_lu = []
+            points_gauss = []
+            for i in range(num_points):
+                x_pos = graph_x + (i / num_points) * graph_width
+                # Limitar valores para que no se salgan del recuadro del grafico
+                y_lu = graph_y + graph_height - min(lu_data[i] / max_val, 1.0) * graph_height
+                y_gauss = graph_y + graph_height - min(gauss_data[i] / max_val, 1.0) * graph_height
+
+                points_lu.append((x_pos, y_lu))
+                points_gauss.append((x_pos, y_gauss))
+
+            # Dibujar líneas
+            if len(points_lu) > 1:
+                pygame.draw.lines(self.screen, (100, 255, 100), False, points_lu, 2)
+            if len(points_gauss) > 1:
+                pygame.draw.lines(self.screen, (255, 200, 100), False, points_gauss, 2)
+
+        label = self.font.render("Performance", True, TEXT_COLOR)
+        self.screen.blit(label, (graph_x + 5, graph_y + 5))
+
     def run_benchmark(self):
         """Benchmark"""
         print("\n" + "="*50)
