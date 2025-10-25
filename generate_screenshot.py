@@ -20,8 +20,8 @@ def generate_screenshot():
     font_large = pygame.font.Font(None, 36)
 
     # Crear sistemas
-    system_lu = EquilibriumSystem(use_lu=True, relaxation=0.3)
-    system_gauss = EquilibriumSystem(use_lu=False, relaxation=0.3)
+    system_lu = EquilibriumSystem(use_lu=True)
+    system_gauss = EquilibriumSystem(use_lu=False)
 
     # Crear escenas
     system_lu.create_grid(
