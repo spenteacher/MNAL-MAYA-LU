@@ -1,0 +1,66 @@
+# Archivos generados por LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.dvi
+*.ps
+*.pdf
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Archivos del IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Archivos temporales
+*.tmp
+*.bak
+*.backup
+
+# Imágenes generadas (opcional - comentar si quieres subirlas)
+# *.png
+# *.jpg
+
+# Mantener solo estos archivos importantes:
+# - Archivos .py (código fuente)
+# - Archivos .tex (documento LaTeX)
+# - Archivos .md (documentación)
+# - requirements.txt
