@@ -17,6 +17,7 @@ TEXT_COLOR = (220, 220, 220)
 ACCENT_COLOR = (100, 200, 255)
 DRAG_COLOR = (255, 255, 100)
 
+
 class Simulator:
     """Simulador principal"""
 
@@ -49,16 +50,12 @@ class Simulator:
         """Crear escena"""
         # LU (izquierda)
         self.system_lu.create_grid(
-            start_x=100, start_y=100,
-            rows=6, cols=10, spacing=35,
-            k=100.0, fix_top=True
+            start_x=100, start_y=100, rows=6, cols=10, spacing=35, k=100.0, fix_top=True
         )
 
         # Gauss (derecha)
         self.system_gauss.create_grid(
-            start_x=650, start_y=100,
-            rows=6, cols=10, spacing=35,
-            k=100.0, fix_top=True
+            start_x=650, start_y=100, rows=6, cols=10, spacing=35, k=100.0, fix_top=True
         )
 
     def handle_events(self):
@@ -157,7 +154,9 @@ class Simulator:
         self.screen.fill(BG_COLOR)
 
         self.draw_system(self.system_lu, "LU Decomposition", True, self.dragging)
-        self.draw_system(self.system_gauss, "Gaussian Elimination", False, self.dragging_gauss)
+        self.draw_system(
+            self.system_gauss, "Gaussian Elimination", False, self.dragging_gauss
+        )
 
         self.draw_ui()
 
@@ -219,7 +218,7 @@ class Simulator:
                 f"Gauss: {avg_gauss:.3f} ms/frame",
                 f"Speedup: {speedup:.2f}x",
                 f"FPS: {self.clock.get_fps():.1f}",
-                "ARRASTRA particulas con el raton"
+                "ARRASTRA particulas con el raton",
             ]
 
             for i, stat in enumerate(stats):
@@ -231,7 +230,7 @@ class Simulator:
             "R: Reiniciar",
             "I: Info on/off",
             "B: Benchmark",
-            "MOUSE: Arrastrar particulas"
+            "MOUSE: Arrastrar particulas",
         ]
 
         for i, control in enumerate(controls):
@@ -241,7 +240,7 @@ class Simulator:
         if self.show_info:
             info = "Las particulas CUELGAN por gravedad"
             surf = self.font.render(info, True, ACCENT_COLOR)
-            self.screen.blit(surf, (WIDTH//2 - 180, y_offset + 5))
+            self.screen.blit(surf, (WIDTH // 2 - 180, y_offset + 5))
 
         self.draw_performance_graph(y_offset)
 
@@ -251,7 +250,9 @@ class Simulator:
         graph_width, graph_height = 250, 80
 
         # Fondo de la gráfica
-        pygame.draw.rect(self.screen, (30, 30, 40), (graph_x, graph_y, graph_width, graph_height))
+        pygame.draw.rect(
+            self.screen, (30, 30, 40), (graph_x, graph_y, graph_width, graph_height)
+        )
 
         # Si hay suficientes datos
         if len(self.frame_times_lu) > 1 and len(self.frame_times_gauss) > 1:
@@ -269,8 +270,16 @@ class Simulator:
             for i in range(num_points):
                 x_pos = graph_x + (i / num_points) * graph_width
                 # Limitar valores para que no se salgan del recuadro del grafico
-                y_lu = graph_y + graph_height - min(lu_data[i] / max_val, 1.0) * graph_height
-                y_gauss = graph_y + graph_height - min(gauss_data[i] / max_val, 1.0) * graph_height
+                y_lu = (
+                    graph_y
+                    + graph_height
+                    - min(lu_data[i] / max_val, 1.0) * graph_height
+                )
+                y_gauss = (
+                    graph_y
+                    + graph_height
+                    - min(gauss_data[i] / max_val, 1.0) * graph_height
+                )
 
                 points_lu.append((x_pos, y_lu))
                 points_gauss.append((x_pos, y_gauss))
@@ -286,20 +295,20 @@ class Simulator:
 
     def run_benchmark(self):
         """Benchmark"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("BENCHMARK - LU vs GAUSS")
-        print("="*50)
+        print("=" * 50)
 
         for n in [10, 20, 30, 50]:
             print(f"\nMatriz {n}x{n}:")
             results = benchmark_solvers(n, num_solves=100)
-            print(f"  LU decomp: {results['lu_decomp_time']*1000:.2f} ms")
-            print(f"  LU solve:  {results['lu_solve_time']*1000:.3f} ms")
-            print(f"  LU total:  {results['lu_total_time']*1000:.2f} ms")
-            print(f"  Gauss:     {results['gauss_total_time']*1000:.2f} ms")
+            print(f"  LU decomp: {results['lu_decomp_time'] * 1000:.2f} ms")
+            print(f"  LU solve:  {results['lu_solve_time'] * 1000:.3f} ms")
+            print(f"  LU total:  {results['lu_total_time'] * 1000:.2f} ms")
+            print(f"  Gauss:     {results['gauss_total_time'] * 1000:.2f} ms")
             print(f"  Speedup:   {results['speedup']:.2f}x")
 
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
 
     def run(self):
         """Loop principal"""
@@ -315,12 +324,12 @@ class Simulator:
 
 
 if __name__ == "__main__":
-    print("="*60)
+    print("=" * 60)
     print("Simulador Visual - LU vs Gauss")
-    print("="*60)
+    print("=" * 60)
     print("Las particulas CUELGAN por gravedad")
     print("Arrastralas para ver la deformacion")
-    print("="*60)
+    print("=" * 60)
 
     sim = Simulator()
     sim.run()

@@ -7,6 +7,7 @@ import numpy as np
 from typing import Tuple
 import time
 
+
 class LUSolver:
     """
     Solver de sistemas lineales usando descomposición LU con pivoteo parcial.
@@ -37,7 +38,7 @@ class LUSolver:
         U = A.copy().astype(float)
         P = np.eye(n)
 
-        for k in range(n-1):
+        for k in range(n - 1):
             # Pivoteo parcial: buscar el elemento de mayor magnitud
             pivot_row = k + np.argmax(np.abs(U[k:, k]))
 
@@ -49,7 +50,7 @@ class LUSolver:
                     L[[k, pivot_row], :k] = L[[pivot_row, k], :k]
 
             # Eliminación gaussiana
-            for i in range(k+1, n):
+            for i in range(k + 1, n):
                 if U[k, k] != 0:
                     factor = U[i, k] / U[k, k]
                     L[i, k] = factor
@@ -89,8 +90,8 @@ class LUSolver:
 
         # Backward substitution: Ux = y
         x = np.zeros(n)
-        for i in range(n-1, -1, -1):
-            x[i] = (y[i] - np.dot(self.U[i, i+1:], x[i+1:])) / self.U[i, i]
+        for i in range(n - 1, -1, -1):
+            x[i] = (y[i] - np.dot(self.U[i, i + 1 :], x[i + 1 :])) / self.U[i, i]
 
         self.solve_time = time.perf_counter() - start_time
 
@@ -122,22 +123,22 @@ class GaussianSolver:
         Ab = np.column_stack([A.copy().astype(float), b.copy().astype(float)])
 
         # Eliminación hacia adelante
-        for k in range(n-1):
+        for k in range(n - 1):
             # Pivoteo
             pivot_row = k + np.argmax(np.abs(Ab[k:, k]))
             if pivot_row != k:
                 Ab[[k, pivot_row]] = Ab[[pivot_row, k]]
 
             # Eliminación
-            for i in range(k+1, n):
+            for i in range(k + 1, n):
                 if Ab[k, k] != 0:
                     factor = Ab[i, k] / Ab[k, k]
                     Ab[i, k:] -= factor * Ab[k, k:]
 
         # Sustitución hacia atrás
         x = np.zeros(n)
-        for i in range(n-1, -1, -1):
-            x[i] = (Ab[i, -1] - np.dot(Ab[i, i+1:n], x[i+1:])) / Ab[i, i]
+        for i in range(n - 1, -1, -1):
+            x[i] = (Ab[i, -1] - np.dot(Ab[i, i + 1 : n], x[i + 1 :])) / Ab[i, i]
 
         self.solve_time = time.perf_counter() - start_time
 
@@ -153,18 +154,18 @@ def benchmark_solvers(n: int, num_solves: int = 100) -> dict:
     A = A + A.T + n * np.eye(n)
 
     results = {
-        'n': n,
-        'num_solves': num_solves,
-        'lu_decomp_time': 0,
-        'lu_solve_time': 0,
-        'lu_total_time': 0,
-        'gauss_total_time': 0,
+        "n": n,
+        "num_solves": num_solves,
+        "lu_decomp_time": 0,
+        "lu_solve_time": 0,
+        "lu_total_time": 0,
+        "gauss_total_time": 0,
     }
 
     # Benchmark LU (descomponer una vez, resolver muchas veces)
     lu = LUSolver()
     lu.decompose(A)
-    results['lu_decomp_time'] = lu.decomposition_time
+    results["lu_decomp_time"] = lu.decomposition_time
 
     lu_solve_times = []
     for _ in range(num_solves):
@@ -172,8 +173,10 @@ def benchmark_solvers(n: int, num_solves: int = 100) -> dict:
         lu.solve(b, reuse_decomposition=True)
         lu_solve_times.append(lu.solve_time)
 
-    results['lu_solve_time'] = np.mean(lu_solve_times)
-    results['lu_total_time'] = results['lu_decomp_time'] + results['lu_solve_time'] * num_solves
+    results["lu_solve_time"] = np.mean(lu_solve_times)
+    results["lu_total_time"] = (
+        results["lu_decomp_time"] + results["lu_solve_time"] * num_solves
+    )
 
     # Benchmark Gauss (resolver desde cero cada vez)
     gauss = GaussianSolver()
@@ -183,7 +186,7 @@ def benchmark_solvers(n: int, num_solves: int = 100) -> dict:
         gauss.solve(A, b)
         gauss_times.append(gauss.solve_time)
 
-    results['gauss_total_time'] = np.sum(gauss_times)
-    results['speedup'] = results['gauss_total_time'] / results['lu_total_time']
+    results["gauss_total_time"] = np.sum(gauss_times)
+    results["speedup"] = results["gauss_total_time"] / results["lu_total_time"]
 
     return results
