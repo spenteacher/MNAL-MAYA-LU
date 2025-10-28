@@ -56,16 +56,11 @@ class EquilibriumSystem:
         return spring
 
     def build_system(self):
-        """
-        Construir K·x = f
-        K = matriz de rigidez (solo resortes)
-        f = K·x_rest + fuerzas_externas (aquí está la gravedad)
-        """
         n_free = sum(1 for p in self.particles if not p.fixed)
         if n_free == 0:
             return None, None, None, None
 
-        # Mapeo
+        # Mapea las partículas con índices
         free_map = {}
         idx = 0
         for i, p in enumerate(self.particles):
@@ -73,14 +68,17 @@ class EquilibriumSystem:
                 free_map[i] = idx
                 idx += 1
 
-        # Matriz K de rigidez (SOLO RESORTES)
+        # Construir matriz K (solo estructura de resortes)
         K = np.zeros((n_free, n_free))
+        f_x = np.zeros(n_free)
+        f_y = np.zeros(n_free)
 
         for spring in self.springs:
             i1 = self.particles.index(spring.p1)
             i2 = self.particles.index(spring.p2)
             k = spring.k
 
+            # Se actualiza K
             if not spring.p1.fixed and not spring.p2.fixed:
                 idx1, idx2 = free_map[i1], free_map[i2]
                 K[idx1, idx1] += k
@@ -94,43 +92,44 @@ class EquilibriumSystem:
                 idx2 = free_map[i2]
                 K[idx2, idx2] += k
 
-        # Regularización
-        K += np.eye(n_free) * 0.1
+            # Contribución al vector de fuerzas f
+            # Calcular dirección del resorte en reposo
+            rest_dir = spring.p2.rest_pos - spring.p1.rest_pos
+            rest_length = np.linalg.norm(rest_dir)
+            if rest_length > 1e-6:
+                rest_dir = rest_dir / rest_length
+                # Fuerza debida a la longitud natural del resorte
+                force_magnitude = k * spring.rest_length
+                force_x = force_magnitude * rest_dir[0]
+                force_y = force_magnitude * rest_dir[1]
 
-        # Vector f = K·x_rest + fuerzas_externas
-        f_x = np.zeros(n_free)
-        f_y = np.zeros(n_free)
+                if not spring.p1.fixed and not spring.p2.fixed:
+                    idx1 = free_map[i1]
+                    idx2 = free_map[i2]
+                    f_x[idx1] -= force_x
+                    f_y[idx1] -= force_y
+                    f_x[idx2] += force_x
+                    f_y[idx2] += force_y
+                elif not spring.p1.fixed:
+                    idx1 = free_map[i1]
+                    # La partícula fija p2 ejerce fuerza sobre p1
+                    f_x[idx1] += k * spring.p2.pos[0] - force_x
+                    f_y[idx1] += k * spring.p2.pos[1] - force_y
+                elif not spring.p2.fixed:
+                    idx2 = free_map[i2]
+                    # La partícula fija p1 ejerce fuerza sobre p2
+                    f_x[idx2] += k * spring.p1.pos[0] + force_x
+                    f_y[idx2] += k * spring.p1.pos[1] + force_y
 
-        # Parte 1: K·x_rest (fuerzas para mantener forma en reposo)
-        for spring in self.springs:
-            i1 = self.particles.index(spring.p1)
-            i2 = self.particles.index(spring.p2)
-
-            if not spring.p1.fixed and not spring.p2.fixed:
-                idx1, idx2 = free_map[i1], free_map[i2]
-                # Fuerza hacia posiciones de resto
-                f_x[idx1] += spring.k * (spring.p2.rest_pos[0] - spring.p1.rest_pos[0])
-                f_x[idx2] += spring.k * (spring.p1.rest_pos[0] - spring.p2.rest_pos[0])
-                f_y[idx1] += spring.k * (spring.p2.rest_pos[1] - spring.p1.rest_pos[1])
-                f_y[idx2] += spring.k * (spring.p1.rest_pos[1] - spring.p2.rest_pos[1])
-            elif not spring.p1.fixed:
-                idx1 = free_map[i1]
-                # Fuerza desde partícula fija
-                f_x[idx1] += spring.k * spring.p2.pos[0]
-                f_y[idx1] += spring.k * spring.p2.pos[1]
-            elif not spring.p2.fixed:
-                idx2 = free_map[i2]
-                # Fuerza desde partícula fija
-                f_x[idx2] += spring.k * spring.p1.pos[0]
-                f_y[idx2] += spring.k * spring.p1.pos[1]
-
-        # Parte 2: Fuerzas externas (GRAVEDAD)
+        # Añadir gravedad
         for i, p in enumerate(self.particles):
             if not p.fixed:
                 idx = free_map[i]
-                # Gravedad actúa directamente
                 f_x[idx] += self.gravity[0]
                 f_y[idx] += self.gravity[1]
+
+        # Regularización
+        K += np.eye(n_free) * 0.1
 
         return K, f_x, f_y, free_map
 
