@@ -96,6 +96,7 @@ class EquilibriumSystem:
             # Calcular dirección del resorte en reposo
             rest_dir = spring.p2.rest_pos - spring.p1.rest_pos
             rest_length = np.linalg.norm(rest_dir)
+            # Proteje de dividir por números muy cercanos al 0 y que salte error
             if rest_length > 1e-6:
                 rest_dir = rest_dir / rest_length
                 # Fuerza debida a la longitud natural del resorte
