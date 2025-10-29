@@ -192,8 +192,8 @@ class EquilibriumSystem:
                     p.velocity *= 0.9  # Damping
 
                     # Límites
-                    p.pos[0] = np.clip(p.pos[0], 10, 590)
-                    p.pos[1] = np.clip(p.pos[1], 10, 500)
+                    p.pos[0] = np.clip(p.pos[0], 10, 2000)
+                    p.pos[1] = np.clip(p.pos[1], 10, 700)
 
                     # Verificar validez
                     if not np.isfinite(p.pos).all():
