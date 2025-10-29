@@ -257,13 +257,13 @@ class Simulator:
         # Si hay suficientes datos
         if len(self.frame_times_lu) > 1 and len(self.frame_times_gauss) > 1:
             # Obtener los últmos 100 valores
-            num_points = min(30, len(self.frame_times_lu))
+            num_points = min(50, len(self.frame_times_lu))
             lu_data = self.frame_times_lu[-num_points:]
             gauss_data = self.frame_times_gauss[-num_points:]
             
 
             # Escala FIJA: siempre usar 5ms como máximo
-            max_val = 10.0  # Escala fija en milisegundos
+            max_val = 5.0  # Escala fija en milisegundos
 
             # Crear puntos para las líneas
             points_lu = []
@@ -280,7 +280,7 @@ class Simulator:
                     # el /3 es para poner en la misma posición los x de lu y gauss
                     graph_y
                     + graph_height
-                    - min(gauss_data[i] / max_val, 1.0) * graph_height  / 3
+                    - min(gauss_data[i] / max_val, 3.0) * graph_height  / 2.80
                 )
 
                 points_lu.append((x_pos, y_lu))
