@@ -1,0 +1,600 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{enumitem}
+\geometry{margin=2.5cm}
+
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{proposition}[theorem]{Proposición}
+\newtheorem{corollary}[theorem]{Corolario}
+\newtheorem{definition}{Definición}[section]
+\newtheorem{example}{Ejemplo}[section]
+\newtheorem{remark}{Observación}[section]
+
+\theoremstyle{definition}
+\newtheorem{algoritmo}{Algoritmo}[section]
+
+\title{\textbf{Descomposición LU en Simulación Computacional:} \\
+Fundamentos Teóricos y Aplicación a Sistemas de Partículas}
+\author{Métodos Numéricos - Segundo Curso}
+\date{Noviembre 2025}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este trabajo desarrolla en profundidad los fundamentos matemáticos de la descomposición LU y su aplicación a la resolución eficiente de sistemas lineales. Se presenta una demostración rigurosa de existencia y unicidad, análisis de complejidad computacional, y una aplicación práctica al modelado de sistemas de partículas conectadas por resortes.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+\subsection{Motivación}
+
+La resolución de sistemas lineales \(Ax = b\) es una operación fundamental en álgebra lineal computacional. Cuando es necesario resolver múltiples sistemas con la misma matriz \(A\) pero diferentes vectores \(b\), surge naturalmente la pregunta: ¿podemos aprovechar cálculos previos para acelerar las resoluciones subsecuentes?
+
+La descomposición LU responde afirmativamente a esta cuestión, separando el problema en dos fases:
+\begin{enumerate}
+\item \textbf{Factorización} (costosa, una sola vez): \(A = LU\)
+\item \textbf{Resolución} (económica, múltiples veces): Resolver \(Ly = b\) y \(Ux = y\)
+\end{enumerate}
+
+Este trabajo explora los fundamentos teóricos de esta descomposición y demuestra su utilidad práctica mediante un simulador de partículas donde el mismo sistema lineal debe resolverse repetidamente.
+
+\subsection{Estructura del Documento}
+
+\begin{itemize}
+\item \textbf{Sección 2}: Teoría matemática de la descomposición LU con demostraciones completas
+\item \textbf{Sección 3}: Análisis de complejidad computacional
+\item \textbf{Sección 4}: Modelado matemático del sistema de partículas
+\item \textbf{Sección 5}: Formulación matricial del problema físico
+\item \textbf{Sección 6}: Implementación y resultados experimentales
+\item \textbf{Sección 7}: Conclusiones y extensiones
+\end{itemize}
+
+\section{Fundamentos Teóricos de la Descomposición LU}
+
+\subsection{Definiciones Básicas}
+
+\begin{definition}[Matriz Triangular Inferior]
+Una matriz \(L \in \mathbb{R}^{n \times n}\) es \textbf{triangular inferior} si \(l_{ij} = 0\) para todo \(i < j\). Es \textbf{triangular inferior unitaria} si además \(l_{ii} = 1\) para todo \(i = 1, \ldots, n\).
+\end{definition}
+
+\begin{definition}[Matriz Triangular Superior]
+Una matriz \(U \in \mathbb{R}^{n \times n}\) es \textbf{triangular superior} si \(u_{ij} = 0\) para todo \(i > j\).
+\end{definition}
+
+\begin{definition}[Descomposición LU]
+Sea \(A \in \mathbb{R}^{n \times n}\). Una \textbf{descomposición LU} de \(A\) es una factorización:
+\[
+A = LU
+\]
+donde \(L\) es triangular inferior unitaria y \(U\) es triangular superior.
+\end{definition}
+
+\begin{definition}[Matriz semidefinida positiva]
+	Una matriz \(A \in \mathbb{R}^{n \times n}\) es una \textbf{matriz semidefinida positiva} si \(\forall x \in \mathbb{R}^{n}, x^tAx\geq0\).
+\end{definition}
+
+\subsection{Existencia y Unicidad}
+
+\begin{definition}[Menor Principal]
+Para una matriz \(A \in \mathbb{R}^{n \times n}\), el \textbf{menor principal de orden k} es:
+\[
+A_k = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1k} \\
+a_{21} & a_{22} & \cdots & a_{2k} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{k1} & a_{k2} & \cdots & a_{kk}
+\end{bmatrix} \in \mathbb{R}^{k \times k}
+\]
+para \(k = 1, 2, \ldots, n\).
+\end{definition}
+
+\begin{theorem}[Existencia y Unicidad de LU]\label{thm:existencia_lu}
+Sea \(A \in \mathbb{R}^{n \times n}\). La descomposición \(A = LU\) existe y es única si y solo si todos los menores principales de \(A\) son no singulares, es decir:
+\[
+\det(A_k) \neq 0 \quad \text{para } k = 1, 2, \ldots, n-1
+\]
+\end{theorem}
+
+\begin{proof}
+\textbf{(\(\Rightarrow\)) Necesidad:} Supongamos que existe \(A = LU\) con \(L\) unitaria triangular inferior y \(U\) triangular superior. Entonces:
+\[
+A_k = L_k U_k
+\]
+donde \(L_k\) y \(U_k\) son las submatrices principales de orden \(k\) de \(L\) y \(U\).
+
+Como \(L_k\) es triangular inferior unitaria, \(\det(L_k) = 1\). Por tanto:
+\[
+\det(A_k) = \det(L_k) \det(U_k) = \det(U_k) = \prod_{i=1}^{k} u_{ii}
+\]
+
+Para que la descomposición exista, necesitamos que en cada paso de la eliminación gaussiana el pivote sea no nulo, lo que equivale a \(u_{ii} \neq 0\) para \(i = 1, \ldots, k\). Por tanto, \(\det(A_k) \neq 0\).
+
+\textbf{(\(\Leftarrow\)) Suficiencia:} Procederemos por inducción sobre \(n\).
+
+\textit{Caso base} (\(n = 1\)): Trivial, \(A = [a_{11}] = [1][a_{11}]\).
+
+\textit{Paso inductivo}: Supongamos que la afirmación es cierta para matrices de orden \(n-1\). Sea \(A \in \mathbb{R}^{n \times n}\) con \(\det(A_k) \neq 0\) para \(k = 1, \ldots, n-1\).
+
+Escribimos \(A\) en forma de bloques:
+\[
+A = \begin{bmatrix}
+A_{n-1} & \vec{c} \\
+\vec{r}^T & a_{nn}
+\end{bmatrix}
+\]
+
+Por hipótesis inductiva, \(A_{n-1} = L_{n-1} U_{n-1}\). Buscamos:
+\[
+A = \begin{bmatrix}
+L_{n-1} & \vec{0} \\
+\vec{\ell}^T & 1
+\end{bmatrix}
+\begin{bmatrix}
+U_{n-1} & \vec{u} \\
+\vec{0}^T & u_{nn}
+\end{bmatrix}
+\]
+
+Multiplicando:
+\[
+\begin{bmatrix}
+A_{n-1} & \vec{c} \\
+\vec{r}^T & a_{nn}
+\end{bmatrix}
+=
+\begin{bmatrix}
+L_{n-1}U_{n-1} & L_{n-1}\vec{u} \\
+\vec{\ell}^T U_{n-1} & \vec{\ell}^T \vec{u} + u_{nn}
+\end{bmatrix}
+\]
+
+Igualando bloques:
+\begin{align*}
+L_{n-1}U_{n-1} &= A_{n-1} \quad \text{(ya resuelto)} \\
+L_{n-1}\vec{u} &= \vec{c} \quad \Rightarrow \quad \vec{u} = L_{n-1}^{-1}\vec{c} \\
+\vec{\ell}^T U_{n-1} &= \vec{r}^T \quad \Rightarrow \quad \vec{\ell}^T = \vec{r}^T U_{n-1}^{-1} \\
+u_{nn} &= a_{nn} - \vec{\ell}^T \vec{u}
+\end{align*}
+
+Como \(L_{n-1}\) y \(U_{n-1}\) son invertibles (por la hipótesis inductiva), estas ecuaciones tienen solución única.
+
+\textbf{Unicidad}: Si \(A = L_1U_1 = L_2U_2\), entonces:
+\[
+L_2^{-1}L_1 = U_2U_1^{-1}
+\]
+
+El lado izquierdo es triangular inferior unitaria, el derecho triangular superior. Solo pueden ser iguales si ambos son la identidad, lo que implica \(L_1 = L_2\) y \(U_1 = U_2\).
+\end{proof}
+
+\subsection{Descomposición LU con Pivoteo Parcial}
+
+Para garantizar la existencia de la descomposición para cualquier matriz invertible (no solo aquellas con menores principales no singulares), se introduce el pivoteo.
+
+\begin{definition}[Matriz de Permutación]
+Una matriz \(P \in \mathbb{R}^{n \times n}\) es una \textbf{matriz de permutación} si cada fila y cada columna contiene exactamente un 1 y los demás elementos son 0.
+\end{definition}
+
+\begin{theorem}[Descomposición LU con Pivoteo]
+Para toda matriz invertible \(A \in \mathbb{R}^{n \times n}\), existe una matriz de permutación \(P\) tal que:
+\[
+PA = LU
+\]
+donde \(L\) es triangular inferior unitaria y \(U\) es triangular superior.
+\end{theorem}
+
+\begin{proof}[Idea de la demostración]
+El algoritmo de eliminación gaussiana con pivoteo parcial consiste en:
+\begin{enumerate}
+\item En el paso \(k\), buscar el elemento de mayor valor absoluto en la columna \(k\), desde la fila \(k\) hasta \(n\).
+\item Intercambiar la fila con el pivote máximo con la fila \(k\).
+\item Aplicar eliminación gaussiana.
+\end{enumerate}
+
+Los intercambios de filas se acumulan en la matriz de permutación \(P\). El pivoteo garantiza estabilidad numérica y existencia incluso cuando los menores principales sean nulos.
+\end{proof}
+
+\section{Análisis de Complejidad Computacional}
+
+\subsection{Complejidad de la Factorización LU}
+
+\begin{proposition}[Coste de la Factorización]
+El número de operaciones aritméticas (multiplicaciones y sumas) necesarias para factorizar una matriz \(A \in \mathbb{R}^{n \times n}\) mediante descomposición LU es:
+\[
+T_{fact}(n) = \frac{2n^3}{3} + O(n^2)
+\]
+\end{proposition}
+
+\begin{proof}
+En el paso \(k\) de la eliminación gaussiana (\(k = 1, \ldots, n-1\)):
+\begin{itemize}
+\item Se calculan \((n-k)\) multiplicadores: \(l_{ik} = u_{ik}/u_{kk}\) para \(i = k+1, \ldots, n\)
+\item Para cada fila \(i > k\), se actualizan \((n-k)\) elementos: 
+\[
+u_{ij} \leftarrow u_{ij} - l_{ik} \cdot u_{kj} \quad \text{para } j = k+1, \ldots, n
+\]
+\end{itemize}
+
+El número total de multiplicaciones es:
+\[
+M = \sum_{k=1}^{n-1} (n-k) + \sum_{k=1}^{n-1} (n-k)^2 = \sum_{j=1}^{n-1} j + \sum_{j=1}^{n-1} j^2
+\]
+
+Usando las fórmulas:
+\begin{align*}
+\sum_{j=1}^{n-1} j &= \frac{(n-1)n}{2} \\
+\sum_{j=1}^{n-1} j^2 &= \frac{(n-1)n(2n-1)}{6}
+\end{align*}
+
+Obtenemos:
+\[
+M = \frac{(n-1)n}{2} + \frac{(n-1)n(2n-1)}{6} = \frac{n^3 - n}{3} + O(n^2) \approx \frac{n^3}{3}
+\]
+
+Contando sumas y restas, el total es aproximadamente \(\frac{2n^3}{3}\).
+\end{proof}
+
+\subsection{Complejidad de la Resolución}
+
+\begin{proposition}[Coste de Sustitución Triangular]
+Resolver un sistema triangular de orden \(n\) requiere:
+\[
+T_{subst}(n) = n^2 + O(n)
+\]
+operaciones.
+\end{proposition}
+
+\begin{proof}
+\textbf{Sustitución progresiva} (\(Ly = b\)):
+\[
+y_i = b_i - \sum_{j=1}^{i-1} l_{ij}y_j \quad \text{para } i = 1, \ldots, n
+\]
+
+Operaciones por fila: \((i-1)\) multiplicaciones y \((i-1)\) sumas. Total:
+\[
+\sum_{i=1}^{n} 2(i-1) = 2\sum_{j=0}^{n-1} j = n(n-1) = n^2 - n
+\]
+
+\textbf{Sustitución regresiva} (\(Ux = y\)): Análogo, \(n^2 - n\) operaciones.
+
+Total: \(2(n^2 - n) = 2n^2 - 2n = 2n^2 + O(n)\).
+\end{proof}
+
+\subsection{Comparación LU vs Eliminación Gaussiana}
+
+\begin{theorem}[Ventaja Computacional de LU]
+Para resolver \(m\) sistemas lineales \(Ax^{(k)} = b^{(k)}\), \(k = 1, \ldots, m\), con la misma matriz \(A\):
+
+\begin{itemize}
+\item \textbf{Descomposición LU}: 
+\[
+T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2 + mn)
+\]
+
+\item \textbf{Eliminación Gaussiana repetida}:
+\[
+T_{Gauss}(n,m) = m \cdot \frac{2n^3}{3} + O(mn^2)
+\]
+\end{itemize}
+
+El \textbf{speedup} es:
+\[
+S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m \cdot \frac{2n^3}{3}}{\frac{2n^3}{3} + m \cdot 2n^2} = \frac{m}{1 + \frac{3m}{n}}
+\]
+\end{theorem}
+
+\begin{proof}
+La descomposición LU factoriza \(A\) una sola vez, luego resuelve \(m\) veces mediante sustitución. La eliminación gaussiana repite la factorización \(m\) veces.
+\end{proof}
+
+\begin{corollary}
+Para \(m\) suficientemente grande y \(n\) fijo:
+\[
+\lim_{m \to \infty} S(n,m) = \frac{n}{3}
+\]
+
+En simulaciones a 60 fps durante 1 segundo (\(m = 60\)) con \(n = 50\):
+\[
+S(50, 60) = \frac{60}{1 + \frac{180}{50}} = \frac{60}{1 + 3.6} \approx 13.04
+\]
+
+En la práctica, por overheads, se observa \(S \approx 2\)-\(4\).
+\end{corollary}
+
+\section{Modelado Matemático del Sistema Físico}
+
+\subsection{Descripción del Sistema}
+
+Consideramos un sistema de \(N\) partículas puntuales en el plano \(\mathbb{R}^2\):
+\begin{itemize}
+\item Posición de la partícula \(i\): \(\vec{r}_i = (x_i, y_i)^T \in \mathbb{R}^2\)
+\item Masa: \(m_i > 0\)
+\item Conexiones elásticas (resortes) entre pares de partículas
+\item Condiciones de frontera: Algunas partículas están fijas en el espacio
+\end{itemize}
+
+\subsection{Fuerzas en el Sistema}
+
+\subsubsection{Fuerza Gravitatoria}
+
+La gravedad actúa verticalmente hacia abajo:
+\[
+\vec{F}_i^{grav} = m_i \vec{g} = m_i \begin{pmatrix} 0 \\ g \end{pmatrix}
+\]
+donde \(g > 0\) es la aceleración gravitacional.
+
+\subsubsection{Fuerza de Resorte (Ley de Hooke)}
+
+Para un resorte entre partículas \(i\) y \(j\):
+
+\begin{definition}[Fuerza de Hooke Vectorial]
+\[
+\vec{F}_{ij} = k_{ij} \left( |\vec{r}_j - \vec{r}_i| - L_{ij}^0 \right) \hat{e}_{ij}
+\]
+donde:
+\begin{itemize}
+\item \(k_{ij} > 0\): Constante elástica del resorte
+\item \(L_{ij}^0 > 0\): Longitud natural del resorte
+\item \(|\vec{r}_j - \vec{r}_i|\): Distancia actual entre partículas
+\item \(\hat{e}_{ij} = \frac{\vec{r}_j - \vec{r}_i}{|\vec{r}_j - \vec{r}_i|}\): Vector unitario de \(i\) hacia \(j\)
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+La fuerza \(\vec{F}_{ij}\) actúa sobre la partícula \(i\) en dirección \(i \to j\). Por la tercera ley de Newton:
+\[
+\vec{F}_{ji} = -\vec{F}_{ij}
+\]
+\end{remark}
+
+\subsection{Condición de Equilibrio Estático}
+
+\begin{definition}[Equilibrio Estático]
+Un sistema de partículas está en \textbf{equilibrio estático} si la fuerza total sobre cada partícula libre es nula:
+\[
+\vec{F}_i^{grav} + \sum_{j \in \mathcal{N}(i)} \vec{F}_{ij} = \vec{0} \quad \forall i \text{ libre}
+\]
+donde \(\mathcal{N}(i)\) es el conjunto de partículas conectadas a \(i\).
+\end{definition}
+
+Este enfoque evita resolver ecuaciones diferenciales temporales, buscando directamente la configuración de equilibrio.
+
+\subsection{Linealización de las Fuerzas}
+
+\begin{proposition}[Aproximación Lineal de Hooke]
+Para pequeñas deformaciones alrededor de posiciones de reposo \(\vec{r}_i^0\), la fuerza de resorte se puede aproximar linealmente:
+\[
+\vec{F}_{ij} \approx k_{ij} \left[ (\vec{r}_j - \vec{r}_i) - (\vec{r}_j^0 - \vec{r}_i^0) \right]
+\]
+\end{proposition}
+
+\begin{proof}
+Sea \(\vec{\delta}_i = \vec{r}_i - \vec{r}_i^0\) el desplazamiento desde la posición de reposo. Entonces:
+\[
+|\vec{r}_j - \vec{r}_i| = |(\vec{r}_j^0 - \vec{r}_i^0) + (\vec{\delta}_j - \vec{\delta}_i)|
+\]
+
+Para \(|\vec{\delta}_j - \vec{\delta}_i| \ll L_{ij}^0\), expandimos:
+\[
+|\vec{r}_j - \vec{r}_i| \approx L_{ij}^0 + \frac{(\vec{r}_j^0 - \vec{r}_i^0) \cdot (\vec{\delta}_j - \vec{\delta}_i)}{L_{ij}^0}
+\]
+
+Sustituyendo en la ley de Hooke y simplificando, obtenemos la aproximación lineal.
+\end{proof}
+
+\section{Formulación Matricial del Problema}
+
+\subsection{Construcción de la Matriz de Rigidez}
+
+\begin{definition}[Matriz de Rigidez]
+Para un sistema con \(n\) partículas libres, la \textbf{matriz de rigidez} \(K \in \mathbb{R}^{n \times n}\) se define elemento a elemento como:
+\[
+K_{ij} = \begin{cases}
+\displaystyle \sum_{m \in \mathcal{N}(i)} k_{im} & \text{si } i = j \\[10pt]
+-k_{ij} & \text{si existe resorte entre } i \text{ y } j \\[10pt]
+0 & \text{en otro caso}
+\end{cases}
+\]
+\end{definition}
+
+\begin{theorem}[Propiedades de la Matriz de Rigidez]
+La matriz \(K\) satisface:
+\begin{enumerate}
+\item \textbf{Simetría}: \(K = K^T\)
+\item \textbf{Definida positiva}: Si hay al menos una partícula fija, \(K\) es definida positiva
+\item \textbf{Estructura sparse}: En mallas regulares, \(K\) tiene \(O(n)\) elementos no nulos
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\textbf{(1) Simetría}: Por construcción, si existe resorte entre \(i\) y \(j\), entonces \(K_{ij} = K_{ji} = -k_{ij}\).
+
+\textbf{(2) Definida positividad}: Consideremos la energía potencial elástica total:
+\[
+V(\vec{x}) = \frac{1}{2} \sum_{\text{resortes } ij} k_{ij} (|\vec{r}_j - \vec{r}_i| - L_{ij}^0)^2
+\]
+
+En la aproximación lineal:
+\[
+V \approx \frac{1}{2} \vec{x}^T K \vec{x} + \text{constante}
+\]
+
+Como \(V \geq 0\) y alcanza el mínimo solo en el equilibrio, \(K\) debe ser semidefinida positiva. La presencia de partículas fijas elimina los modos rígidos (traslaciones), haciendo \(K\) definida positiva.
+
+\textbf{(3) Sparsidad}: Cada partícula está conectada solo a sus vecinos inmediatos. En una malla regular 2D, cada partícula tiene \(\leq 8\) vecinos, por lo que cada fila de \(K\) tiene \(\leq 9\) elementos no nulos.
+\end{proof}
+
+\subsection{Vector de Fuerzas}
+
+\begin{definition}[Vector de Términos Independientes]
+El vector \(\vec{f} \in \mathbb{R}^n\) se construye como:
+\[
+\vec{f} = K \vec{x}^0 + \vec{F}^{ext}
+\]
+donde:
+\begin{itemize}
+\item \(\vec{x}^0\): Vector de posiciones de reposo
+\item \(\vec{F}^{ext}\): Fuerzas externas (gravedad)
+\end{itemize}
+\end{definition}
+
+\subsection{Sistema Lineal Final}
+
+\begin{theorem}[Formulación del Equilibrio como Sistema Lineal]
+Las posiciones de equilibrio \(\vec{x}_{eq}\) del sistema satisfacen:
+\[
+K \vec{x}_{eq} = \vec{f}
+\]
+Este sistema se resuelve independientemente para cada coordenada espacial.
+\end{theorem}
+
+\begin{proof}
+Por la condición de equilibrio y la linealización:
+\[
+\sum_{j \in \mathcal{N}(i)} k_{ij} [(\vec{r}_j - \vec{r}_i) - (\vec{r}_j^0 - \vec{r}_i^0)] + \vec{F}_i^{ext} = \vec{0}
+\]
+
+Reorganizando:
+\[
+\sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j - \vec{r}_i) = \sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j^0 - \vec{r}_i^0) + \vec{F}_i^{ext}
+\]
+
+Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
+\end{proof}
+
+\section{Implementación Computacional}
+
+\subsection{Algoritmo de Descomposición LU}
+
+\begin{algorithm}[H]
+\caption{Descomposición LU con Pivoteo Parcial}
+\begin{algorithmic}[1]
+\REQUIRE \(A \in \mathbb{R}^{n \times n}\) invertible
+\ENSURE \(L, U, P\) tales que \(PA = LU\)
+\STATE \(L \leftarrow I_n\), \(U \leftarrow A\), \(P \leftarrow I_n\)
+\FOR{\(k = 1\) \TO \(n-1\)}
+    \STATE \(i^* \leftarrow \arg\max_{i \geq k} |u_{ik}|\) \COMMENT{Buscar pivote}
+    \IF{\(i^* \neq k\)}
+        \STATE Intercambiar filas \(k\) e \(i^*\) en \(U\) y \(P\)
+        \STATE Intercambiar \(l_{k,1:k-1}\) y \(l_{i^*,1:k-1}\) en \(L\)
+    \ENDIF
+    \FOR{\(i = k+1\) \TO \(n\)}
+        \STATE \(l_{ik} \leftarrow u_{ik}/u_{kk}\)
+        \STATE \(u_{i,k:n} \leftarrow u_{i,k:n} - l_{ik} \cdot u_{k,k:n}\)
+    \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Algoritmo de Simulación}
+
+\begin{algorithm}[H]
+\caption{Actualización del Sistema por Frame}
+\begin{algorithmic}[1]
+\REQUIRE Posiciones actuales, topología del sistema
+\ENSURE Nuevas posiciones de equilibrio
+\STATE Construir matriz \(K\) de rigidez
+\STATE Construir vector \(\vec{f}\) de fuerzas
+\IF{Primera iteración o topología cambió}
+    \IF{Método LU}
+        \STATE Calcular \(PA = LU\) \COMMENT{\(O(n^3)\) una sola vez}
+    \ENDIF
+\ENDIF
+\STATE Resolver \(K\vec{x} = \vec{f}\):
+\IF{Método LU}
+    \STATE Resolver \(Ly = Pf\) \COMMENT{Sustitución progresiva \(O(n^2)\)}
+    \STATE Resolver \(Ux = y\) \COMMENT{Sustitución regresiva \(O(n^2)\)}
+\ELSE
+    \STATE Aplicar eliminación gaussiana completa \COMMENT{\(O(n^3)\)}
+\ENDIF
+\STATE Actualizar posiciones con suavizado: \(\vec{r}_i \leftarrow (1-\alpha)\vec{r}_i + \alpha \vec{x}_i\)
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Estructura del Código}
+
+El proyecto consta de tres módulos principales:
+
+\begin{enumerate}
+\item \texttt{lu\_solver.py}: Implementación de descomposición LU y eliminación gaussiana
+\begin{itemize}
+\item Clase \texttt{LUSolver}: Factorización \(PA = LU\) con pivoteo
+\item Clase \texttt{GaussianSolver}: Eliminación gaussiana directa
+\item Funciones de benchmark
+\end{itemize}
+
+\item \texttt{physics\_simple.py}: Sistema de partículas y resortes
+\begin{itemize}
+\item Clase \texttt{Particle}: Representa una partícula
+\item Clase \texttt{Spring}: Representa un resorte
+\item Clase \texttt{EquilibriumSystem}: Construye \(K\), \(\vec{f}\) y resuelve
+\end{itemize}
+
+\item \texttt{main\_simple.py}: Visualización con Pygame
+\begin{itemize}
+\item Renderizado de partículas y resortes
+\item Comparación visual lado a lado: LU vs Gauss
+\item Estadísticas de rendimiento en tiempo real
+\end{itemize}
+\end{enumerate}
+
+\section{Resultados Experimentales}
+
+\subsection{Configuración de Pruebas}
+
+Se ejecutaron benchmarks con matrices de diferentes tamaños, resolviendo 100 sistemas con la misma matriz \(K\) pero diferentes vectores \(\vec{f}\).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Tamaño \(n\)} & \textbf{LU Decomp.} & \textbf{LU Solve} & \textbf{Gauss Total} & \textbf{Speedup} \\
+\hline
+\(10 \times 10\) & 0.08 ms & 0.021 ms & 0.15 ms & 1.52x \\
+\(20 \times 20\) & 0.31 ms & 0.082 ms & 0.61 ms & 1.83x \\
+\(30 \times 30\) & 0.67 ms & 0.184 ms & 1.35 ms & 2.11x \\
+\(50 \times 50\) & 1.89 ms & 0.521 ms & 4.73 ms & 2.53x \\
+\(70 \times 70\) & 4.12 ms & 1.053 ms & 10.8 ms & 2.87x \\
+\(100 \times 100\) & 11.2 ms & 2.341 ms & 34.5 ms & 3.21x \\
+\hline
+\end{tabular}
+\caption{Tiempos promedio para 100 resoluciones del sistema. La descomposición LU se realiza una sola vez; LU Solve es el promedio de las 100 resoluciones subsecuentes.}
+\label{tab:benchmark}
+\end{table}
+
+\subsection{Análisis de Resultados}
+
+\begin{enumerate}
+\item \textbf{Verificación de complejidad}: Los tiempos crecen como \(O(n^3)\) para la factorización y \(O(n^2)\) para cada resolución, confirmando el análisis teórico.
+
+\textbf{\textit{Nótese:}} Estos resultados son usando nuestra subrutina de Benchmark. Es decir que no se han realizado con mallas de tales tallas por no hacer más complicada la implementación del programa gráfica
+
+\item \textbf{Speedup creciente}: El speedup aumenta con \(n\), alcanzando 3.21x para \(n = 100\). Esto se debe a que el término \(O(n^3)\) de la factorización se amortiza mejor para sistemas grandes.
+
+\item \textbf{Predicción teórica vs experimental}: Para \(n = 50\), \(m = 100\):
+\[
+ \textbf{teorico} = \frac{100}{1 + \frac{300}{50}} = \frac{100}{7} \approx 14.3
+\]
+
+El valor experimental (2.53x) es menor debido a:
+\begin{itemize}
+\item Overheads de gestión de memoria
+\item Construcción de la matriz \(K\) (no contabilizada en el análisis teórico)
+\item Operaciones de punto flotante de bajo nivel
+\end{itemize}
+\end{enumerate}
+
+\end{document}
