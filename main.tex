@@ -18,14 +18,17 @@
 \newtheorem{definition}{Definición}[section]
 \newtheorem{example}{Ejemplo}[section]
 \newtheorem{remark}{Observación}[section]
+\newtheorem{notation}{Notación}[section]
 
 \theoremstyle{definition}
 \newtheorem{algoritmo}{Algoritmo}[section]
 
+\newcommand{\matn}{\mathbb{R}^n}
+\newcommand{\matnn}{\mathbb{R}^{n \times n}}
+
 \title{\textbf{Descomposición LU en Simulación Computacional:} \\
 Fundamentos Teóricos y Aplicación a Sistemas de Partículas}
-\author{Métodos Numéricos - Segundo Curso}
-\date{Noviembre 2025}
+\author{Zaragoza Pastor, Liu \\Hernández Barrero, Jose\\Liu, Biyi \\Fernández García, Aquilas\\Botella Guillén, Pau}
 
 \begin{document}
 
@@ -68,15 +71,15 @@ Este trabajo explora los fundamentos teóricos de esta descomposición y demuest
 \subsection{Definiciones Básicas}
 
 \begin{definition}[Matriz Triangular Inferior]
-Una matriz \(L \in \mathbb{R}^{n \times n}\) es \textbf{triangular inferior} si \(l_{ij} = 0\) para todo \(i < j\). Es \textbf{triangular inferior unitaria} si además \(l_{ii} = 1\) para todo \(i = 1, \ldots, n\).
+Una matriz \(L \in \matnn\) es \textbf{triangular inferior} si \(l_{ij} = 0\) para todo \(i < j\). Es \textbf{triangular inferior unitaria} si además \(l_{ii} = 1\) para todo \(i = 1, \ldots, n\).
 \end{definition}
 
 \begin{definition}[Matriz Triangular Superior]
-Una matriz \(U \in \mathbb{R}^{n \times n}\) es \textbf{triangular superior} si \(u_{ij} = 0\) para todo \(i > j\).
+Una matriz \(U \in \matnn\) es \textbf{triangular superior} si \(u_{ij} = 0\) para todo \(i > j\).
 \end{definition}
 
 \begin{definition}[Descomposición LU]
-Sea \(A \in \mathbb{R}^{n \times n}\). Una \textbf{descomposición LU} de \(A\) es una factorización:
+Sea \(A \in \matnn\). Una \textbf{descomposición LU} de \(A\) es una factorización:
 \[
 A = LU
 \]
@@ -84,112 +87,42 @@ donde \(L\) es triangular inferior unitaria y \(U\) es triangular superior.
 \end{definition}
 
 \begin{definition}[Matriz semidefinida positiva]
-	Una matriz \(A \in \mathbb{R}^{n \times n}\) es una \textbf{matriz semidefinida positiva} si \(\forall x \in \mathbb{R}^{n}, x^tAx\geq0\).
+	Una matriz \(A \in \matnn\) es una \textbf{matriz semidefinida positiva} si \(\forall x \in \matn \setminus\{0\}, x^tAx\geq0\).
 \end{definition}
 
-\subsection{Existencia y Unicidad}
+\subsection{Descomposición LU}
 
-\begin{definition}[Menor Principal]
-Para una matriz \(A \in \mathbb{R}^{n \times n}\), el \textbf{menor principal de orden k} es:
+Sea \(A^{(0)} = A\in \matnn\), denotaremos al multiplicador \(i,j\)-ésimo como \(\alpha_{i,j}=-\frac{a_{ij}^{(j-1)}}{a_{jj}^{(j-1)}}\). Basándose en la descomposición gaussiana, el algoritmo de la descomposición LU consiste en: 
+\begin{enumerate}
+    \item En el paso \(k\), partiendo de la matriz \(A^{(k)}\), aplicamos transformaciones elementales para hacer cero todos los elementos por debajo de la diagonal principal en la columna \(k\).
+    \item Definimos la matriz \(M_k\) como la matriz que recoge las transformaciones elementales del paso \(k\) de tal manera que \(A^{(k)}=M_kA^{(k-1)}\).
+\end{enumerate}
+Este algoritmo se repetirá hasta el paso \(n-1\), donde obtendríamos que \(A^{(n-1)}=U\).
+
+Por otro lado, \(L\) lo obtenemos de:
 \[
-A_k = \begin{bmatrix}
-a_{11} & a_{12} & \cdots & a_{1k} \\
-a_{21} & a_{22} & \cdots & a_{2k} \\
-\vdots & \vdots & \ddots & \vdots \\
-a_{k1} & a_{k2} & \cdots & a_{kk}
-\end{bmatrix} \in \mathbb{R}^{k \times k}
-\]
-para \(k = 1, 2, \ldots, n\).
-\end{definition}
-
-\begin{theorem}[Existencia y Unicidad de LU]\label{thm:existencia_lu}
-Sea \(A \in \mathbb{R}^{n \times n}\). La descomposición \(A = LU\) existe y es única si y solo si todos los menores principales de \(A\) son no singulares, es decir:
+I-\sum_{k=1}^{n-1}v^{(k)}e_k^T
+\] 
+donde \(v^{(k)}\) viene dado por
 \[
-\det(A_k) \neq 0 \quad \text{para } k = 1, 2, \ldots, n-1
-\]
-\end{theorem}
+\sum_{j=k+1}^n \alpha_{j,k}e_j
+\] 
+y \(e_j\) y \(e_k\) son los vectores de la base canónica de \(\matn\).
 
-\begin{proof}
-\textbf{(\(\Rightarrow\)) Necesidad:} Supongamos que existe \(A = LU\) con \(L\) unitaria triangular inferior y \(U\) triangular superior. Entonces:
-\[
-A_k = L_k U_k
-\]
-donde \(L_k\) y \(U_k\) son las submatrices principales de orden \(k\) de \(L\) y \(U\).
-
-Como \(L_k\) es triangular inferior unitaria, \(\det(L_k) = 1\). Por tanto:
-\[
-\det(A_k) = \det(L_k) \det(U_k) = \det(U_k) = \prod_{i=1}^{k} u_{ii}
-\]
-
-Para que la descomposición exista, necesitamos que en cada paso de la eliminación gaussiana el pivote sea no nulo, lo que equivale a \(u_{ii} \neq 0\) para \(i = 1, \ldots, k\). Por tanto, \(\det(A_k) \neq 0\).
-
-\textbf{(\(\Leftarrow\)) Suficiencia:} Procederemos por inducción sobre \(n\).
-
-\textit{Caso base} (\(n = 1\)): Trivial, \(A = [a_{11}] = [1][a_{11}]\).
-
-\textit{Paso inductivo}: Supongamos que la afirmación es cierta para matrices de orden \(n-1\). Sea \(A \in \mathbb{R}^{n \times n}\) con \(\det(A_k) \neq 0\) para \(k = 1, \ldots, n-1\).
-
-Escribimos \(A\) en forma de bloques:
-\[
-A = \begin{bmatrix}
-A_{n-1} & \vec{c} \\
-\vec{r}^T & a_{nn}
-\end{bmatrix}
-\]
-
-Por hipótesis inductiva, \(A_{n-1} = L_{n-1} U_{n-1}\). Buscamos:
-\[
-A = \begin{bmatrix}
-L_{n-1} & \vec{0} \\
-\vec{\ell}^T & 1
-\end{bmatrix}
-\begin{bmatrix}
-U_{n-1} & \vec{u} \\
-\vec{0}^T & u_{nn}
-\end{bmatrix}
-\]
-
-Multiplicando:
-\[
-\begin{bmatrix}
-A_{n-1} & \vec{c} \\
-\vec{r}^T & a_{nn}
-\end{bmatrix}
-=
-\begin{bmatrix}
-L_{n-1}U_{n-1} & L_{n-1}\vec{u} \\
-\vec{\ell}^T U_{n-1} & \vec{\ell}^T \vec{u} + u_{nn}
-\end{bmatrix}
-\]
-
-Igualando bloques:
-\begin{align*}
-L_{n-1}U_{n-1} &= A_{n-1} \quad \text{(ya resuelto)} \\
-L_{n-1}\vec{u} &= \vec{c} \quad \Rightarrow \quad \vec{u} = L_{n-1}^{-1}\vec{c} \\
-\vec{\ell}^T U_{n-1} &= \vec{r}^T \quad \Rightarrow \quad \vec{\ell}^T = \vec{r}^T U_{n-1}^{-1} \\
-u_{nn} &= a_{nn} - \vec{\ell}^T \vec{u}
-\end{align*}
-
-Como \(L_{n-1}\) y \(U_{n-1}\) son invertibles (por la hipótesis inductiva), estas ecuaciones tienen solución única.
-
-\textbf{Unicidad}: Si \(A = L_1U_1 = L_2U_2\), entonces:
-\[
-L_2^{-1}L_1 = U_2U_1^{-1}
-\]
-
-El lado izquierdo es triangular inferior unitaria, el derecho triangular superior. Solo pueden ser iguales si ambos son la identidad, lo que implica \(L_1 = L_2\) y \(U_1 = U_2\).
-\end{proof}
+\begin{remark}
+    Es importante notar que si durante una iteración de la eliminación gaussiana existe algún pivote nulo, el algoritmo anterior se interrumpiría (pues \(a_{ii}^{(k)}=0\). Para evitar este caso, utilizaremos la descomposición LU con pivoteo, la cual, si se cumple ciertas hipótesis, podemos obtener una descomposición similar a la LU.
+\end{remark}
 
 \subsection{Descomposición LU con Pivoteo Parcial}
 
 Para garantizar la existencia de la descomposición para cualquier matriz invertible (no solo aquellas con menores principales no singulares), se introduce el pivoteo.
 
 \begin{definition}[Matriz de Permutación]
-Una matriz \(P \in \mathbb{R}^{n \times n}\) es una \textbf{matriz de permutación} si cada fila y cada columna contiene exactamente un 1 y los demás elementos son 0.
+Una matriz \(P \in \matnn\) es una \textbf{matriz de permutación} si cada fila y cada columna contiene exactamente un 1 y los demás elementos son 0.
 \end{definition}
 
 \begin{theorem}[Descomposición LU con Pivoteo]
-Para toda matriz invertible \(A \in \mathbb{R}^{n \times n}\), existe una matriz de permutación \(P\) tal que:
+Para toda matriz invertible \(A \in \matnn\), existe una matriz de permutación \(P\) tal que:
 \[
 PA = LU
 \]
@@ -212,7 +145,7 @@ Los intercambios de filas se acumulan en la matriz de permutación \(P\). El piv
 \subsection{Complejidad de la Factorización LU}
 
 \begin{proposition}[Coste de la Factorización]
-El número de operaciones aritméticas (multiplicaciones y sumas) necesarias para factorizar una matriz \(A \in \mathbb{R}^{n \times n}\) mediante descomposición LU es:
+El número de operaciones aritméticas (multiplicaciones y sumas) necesarias para factorizar una matriz \(A \in \matnn\) mediante descomposición LU es:
 \[
 T_{fact}(n) = \frac{2n^3}{3} + O(n^2)
 \]
@@ -221,16 +154,16 @@ T_{fact}(n) = \frac{2n^3}{3} + O(n^2)
 \begin{proof}
 En el paso \(k\) de la eliminación gaussiana (\(k = 1, \ldots, n-1\)):
 \begin{itemize}
-\item Se calculan \((n-k)\) multiplicadores: \(l_{ik} = u_{ik}/u_{kk}\) para \(i = k+1, \ldots, n\)
-\item Para cada fila \(i > k\), se actualizan \((n-k)\) elementos: 
+\item Se calculan \((n-k)\) multiplicadores: \(\alpha_{ik} = -a_{ik}^{(j-1)}/a_{kk}^{(j-1)}\) para \(i = k+1, \ldots, n\)
+\item Se calculan \(2(n-k)^2\) operaciones para la matriz de trabajo (2 operaciones/elemento).
 \[
-u_{ij} \leftarrow u_{ij} - l_{ik} \cdot u_{kj} \quad \text{para } j = k+1, \ldots, n
+a_{ij} \leftarrow a_{ij} - \alpha_{ik} \cdot a_{kj} \quad \text{para } j = k+1, \ldots, n
 \]
 \end{itemize}
 
 El número total de multiplicaciones es:
 \[
-M = \sum_{k=1}^{n-1} (n-k) + \sum_{k=1}^{n-1} (n-k)^2 = \sum_{j=1}^{n-1} j + \sum_{j=1}^{n-1} j^2
+M = \sum_{k=1}^{n-1} (n-k) + \sum_{k=1}^{n-1} 2(n-k)^2 = \sum_{j=1}^{n-1} j + \sum_{j=1}^{n-1} 2j^2
 \]
 
 Usando las fórmulas:
@@ -241,10 +174,10 @@ Usando las fórmulas:
 
 Obtenemos:
 \[
-M = \frac{(n-1)n}{2} + \frac{(n-1)n(2n-1)}{6} = \frac{n^3 - n}{3} + O(n^2) \approx \frac{n^3}{3}
+M = \frac{(n-1)n}{2} + 2\frac{(n-1)n(2n-1)}{6} = \frac{4n^3 -3n^2 - n}{6} = \frac{2n^3}{6} - \frac{n^2}{2} - \frac{n}{6}
 \]
 
-Contando sumas y restas, el total es aproximadamente \(\frac{2n^3}{3}\).
+Por tanto, tenemos que \(T_{fact}(n) = \frac{2n^3}{3} + O(n^2)\).
 \end{proof}
 
 \subsection{Complejidad de la Resolución}
@@ -252,7 +185,7 @@ Contando sumas y restas, el total es aproximadamente \(\frac{2n^3}{3}\).
 \begin{proposition}[Coste de Sustitución Triangular]
 Resolver un sistema triangular de orden \(n\) requiere:
 \[
-T_{subst}(n) = n^2 + O(n)
+T_{subst}(n) = n^2
 \]
 operaciones.
 \end{proposition}
@@ -260,17 +193,19 @@ operaciones.
 \begin{proof}
 \textbf{Sustitución progresiva} (\(Ly = b\)):
 \[
-y_i = b_i - \sum_{j=1}^{i-1} l_{ij}y_j \quad \text{para } i = 1, \ldots, n
+y_i = \frac{1}{l_{ii}}(b_i - \sum_{j=1}^{i-1} l_{ij}y_j) \quad \text{para } i = 1, \ldots, n
 \]
-
-Operaciones por fila: \((i-1)\) multiplicaciones y \((i-1)\) sumas. Total:
+Operaciones por fila:
+\begin{itemize}
+    \item En el sumatorio: \((i-1)\) multiplicaciones \(i-2\) sumas
+    \item Fuera del sumatorio: \(2\) sumas
+\end{itemize}
+Total:
 \[
-\sum_{i=1}^{n} 2(i-1) = 2\sum_{j=0}^{n-1} j = n(n-1) = n^2 - n
+\sum_{i=1}^{n} (2i-1) = 2\sum_{j=0}^{n}j - n = 2\frac{n(n+1)}{2}-n = n^2
 \]
 
-\textbf{Sustitución regresiva} (\(Ux = y\)): Análogo, \(n^2 - n\) operaciones.
-
-Total: \(2(n^2 - n) = 2n^2 - 2n = 2n^2 + O(n)\).
+\textbf{Sustitución regresiva} (\(Ux = y\)): Análogo, \(n^2\) operaciones.
 \end{proof}
 
 \subsection{Comparación LU vs Eliminación Gaussiana}
@@ -281,7 +216,7 @@ Para resolver \(m\) sistemas lineales \(Ax^{(k)} = b^{(k)}\), \(k = 1, \ldots, m
 \begin{itemize}
 \item \textbf{Descomposición LU}: 
 \[
-T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2 + mn)
+T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
 \]
 
 \item \textbf{Eliminación Gaussiana repetida}:
@@ -400,9 +335,9 @@ Sustituyendo en la ley de Hooke y simplificando, obtenemos la aproximación line
 \subsection{Construcción de la Matriz de Rigidez}
 
 \begin{definition}[Matriz de Rigidez]
-Para un sistema con \(n\) partículas libres, la \textbf{matriz de rigidez} \(K \in \mathbb{R}^{n \times n}\) se define elemento a elemento como:
+Para un sistema con \(n\) partículas libres, la \textbf{matriz de rigidez} \(K \in \matnn\) se define elemento a elemento como:
 \[
-K_{ij} = \begin{cases}
+k_{ij} = \begin{cases}
 \displaystyle \sum_{m \in \mathcal{N}(i)} k_{im} & \text{si } i = j \\[10pt]
 -k_{ij} & \text{si existe resorte entre } i \text{ y } j \\[10pt]
 0 & \text{en otro caso}
@@ -482,7 +417,7 @@ Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
 \begin{algorithm}[H]
 \caption{Descomposición LU con Pivoteo Parcial}
 \begin{algorithmic}[1]
-\REQUIRE \(A \in \mathbb{R}^{n \times n}\) invertible
+\REQUIRE \(A \in \matnn\) invertible
 \ENSURE \(L, U, P\) tales que \(PA = LU\)
 \STATE \(L \leftarrow I_n\), \(U \leftarrow A\), \(P \leftarrow I_n\)
 \FOR{\(k = 1\) \TO \(n-1\)}
