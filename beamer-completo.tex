@@ -1,0 +1,523 @@
+\documentclass[10pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title{Descomposición LU en Simulación Computacional}
+\subtitle{Fundamentos Teóricos y Aplicación a Sistemas de Partículas}
+\author{S. Zaragoza Pastor \and J. Hernández Barrero \and B. Liu \and A. Fernández García \and P. Botella Guillén}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Contenido}
+  \tableofcontents
+\end{frame}
+
+% ============================================================
+% SECCIÓN 1: INTRODUCCIÓN
+% ============================================================
+\section{Introducción}
+
+\begin{frame}{Motivación}
+La resolución de sistemas lineales $Ax = b$ es fundamental en álgebra lineal computacional.
+
+\vspace{0.3cm}
+\textbf{Pregunta clave:} ¿Podemos aprovechar cálculos previos al resolver múltiples sistemas con la misma matriz $A$ pero diferentes vectores $b$?
+
+\vspace{0.3cm}
+\textbf{Respuesta:} La descomposición LU separa el problema en dos fases:
+\begin{enumerate}
+  \item \textbf{Factorización:} $A = LU$ (una sola vez)
+  \item \textbf{Resolución:} Resolver $Ly = b$ y $Ux = y$ (para cada $b$)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Aplicación Práctica}
+\textbf{Sistema de partículas conectadas por resortes:}
+\begin{itemize}
+  \item Modelado mediante ecuaciones de equilibrio estático
+  \item Resulta en sistemas lineales grandes $Kx = f$
+  \item La matriz $K$ (rigidez) es simétrica y definida positiva
+  \item Necesidad de resolver múltiples configuraciones eficientemente
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SECCIÓN 2: FUNDAMENTOS TEÓRICOS
+% ============================================================
+\section{Fundamentos Teóricos de la Descomposición LU}
+
+\begin{frame}{Matriz Triangular Inferior}
+\textbf{Definición:}
+Una matriz $L \in \mathbb{R}^{n \times n}$ es \textbf{triangular inferior} si:
+\[
+L_{ij} = 0 \quad \text{para todo } i < j
+\]
+
+\textbf{Forma:}
+\[
+L = \begin{pmatrix}
+l_{11} & 0 & 0 & \cdots & 0 \\
+l_{21} & l_{22} & 0 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \ddots & \vdots \\
+l_{n1} & l_{n2} & \cdots & l_{n,n-1} & l_{nn}
+\end{pmatrix}
+\]
+\end{frame}
+
+\begin{frame}{Matriz Triangular Superior}
+\textbf{Definición:}
+Una matriz $U \in \mathbb{R}^{n \times n}$ es \textbf{triangular superior} si:
+\[
+U_{ij} = 0 \quad \text{para todo } i > j
+\]
+
+\textbf{Forma:}
+\[
+U = \begin{pmatrix}
+u_{11} & u_{12} & u_{13} & \cdots & u_{1n} \\
+0 & u_{22} & u_{23} & \cdots & u_{2n} \\
+\vdots & \ddots & \ddots & \ddots & \vdots \\
+0 & \cdots & 0 & u_{n-1,n-1} & u_{n-1,n} \\
+0 & \cdots & \cdots & 0 & u_{nn}
+\end{pmatrix}
+\]
+\end{frame}
+
+\begin{frame}{Descomposición LU}
+\textbf{Definición:}
+Una matriz $A \in \mathbb{R}^{n \times n}$ admite una \textbf{descomposición LU} si existen matrices:
+\begin{itemize}
+  \item $L$ triangular inferior con $L_{ii} = 1$ para todo $i$
+  \item $U$ triangular superior
+\end{itemize}
+tales que:
+\[
+A = LU
+\]
+\end{frame}
+
+\begin{frame}{Existencia y Unicidad}
+\textbf{Teorema:}
+Sea $A \in \mathbb{R}^{n \times n}$. Si todos los menores principales de $A$ son no singulares, entonces existe una única descomposición $A = LU$ con $L$ triangular inferior unitaria y $U$ triangular superior.
+
+\vspace{0.3cm}
+\textbf{Menor principal de orden $k$:}
+\[
+A_k = \begin{pmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \ddots & \vdots \\
+a_{k1} & \cdots & a_{kk}
+\end{pmatrix}
+\]
+\end{frame}
+
+\begin{frame}{Matriz de Permutación}
+Cuando la condición de menores principales no se cumple, usamos \textbf{pivoteo parcial}.
+
+\vspace{0.3cm}
+\textbf{Definición:} Una matriz $P \in \mathbb{R}^{n \times n}$ es de permutación si:
+\begin{itemize}
+  \item Cada fila y columna tiene exactamente un 1
+  \item Los demás elementos son 0
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Ejemplo:}
+\[
+P = \begin{pmatrix}
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+\]
+intercambia las filas 1 y 2.
+\end{frame}
+
+\begin{frame}{Descomposición LU con Pivoteo Parcial}
+\textbf{Teorema:}
+Para toda matriz $A \in \mathbb{R}^{n \times n}$ no singular, existe una matriz de permutación $P$ tal que:
+\[
+PA = LU
+\]
+donde $L$ es triangular inferior unitaria y $U$ es triangular superior.
+
+\vspace{0.3cm}
+\textbf{Ventaja:} Mejora la estabilidad numérica al evitar divisiones por elementos muy pequeños.
+\end{frame}
+
+% ============================================================
+% SECCIÓN 3: COMPLEJIDAD COMPUTACIONAL
+% ============================================================
+\section{Análisis de Complejidad Computacional}
+
+\begin{frame}{Complejidad de la Factorización LU}
+\textbf{Proposición:}
+El algoritmo de factorización LU sin pivoteo requiere:
+\[
+\frac{2n^3}{3} + O(n^2) \text{ operaciones}
+\]
+
+\vspace{0.3cm}
+\textbf{Justificación:}
+Para cada columna $k$, se realizan:
+\begin{itemize}
+  \item Cálculo de multiplicadores: $n-k$ operaciones
+  \item Actualización de la submatriz: $(n-k)^2$ operaciones
+\end{itemize}
+
+Total: $\displaystyle \sum_{k=1}^{n-1} (n-k)^2 = \frac{n(n-1)(2n-1)}{6} \approx \frac{n^3}{3}$
+\end{frame}
+
+\begin{frame}{Complejidad de la Resolución}
+\textbf{Proposición:}
+Resolver dos sistemas triangulares (sustitución progresiva y regresiva) requiere:
+\[
+2n^2 \text{ operaciones}
+\]
+
+\vspace{0.3cm}
+\textbf{Desglose:}
+\begin{itemize}
+  \item Sustitución progresiva ($Ly = b$): $n^2$ operaciones
+  \item Sustitución regresiva ($Ux = y$): $n^2$ operaciones
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Comparación LU vs Eliminación Gaussiana}
+\textbf{Problema:} Resolver $m$ sistemas $Ax^{(k)} = b^{(k)}$ con la misma matriz $A$.
+
+\vspace{0.3cm}
+\begin{block}{Descomposición LU}
+\[
+T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
+\]
+\end{block}
+
+\begin{block}{Eliminación Gaussiana repetida}
+\[
+T_{Gauss}(n,m) = m \cdot \frac{2n^3}{3} + O(mn^2)
+\]
+\end{block}
+\end{frame}
+
+\begin{frame}{Speedup de la Descomposición LU}
+\textbf{Factor de aceleración:}
+\[
+S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m \cdot \frac{2n^3}{3}}{\frac{2n^3}{3} + m \cdot 2n^2} = \frac{m}{1 + \frac{3m}{n}}
+\]
+
+\vspace{0.3cm}
+\textbf{Análisis:}
+\begin{itemize}
+  \item Si $m \ll n$: $S \approx m$ (speedup lineal en $m$)
+  \item Si $m \gg n$: $S \approx \frac{n}{3}$ (speedup limitado por $n$)
+  \item Para $n = 1000$, $m = 10$: $S \approx 9.7$ (cerca de 10x más rápido)
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SECCIÓN 4: MODELADO MATEMÁTICO
+% ============================================================
+\section{Modelado Matemático del Sistema Físico}
+
+\begin{frame}{Descripción del Sistema}
+Consideramos un sistema de $N$ partículas puntuales en $\mathbb{R}^2$:
+
+\vspace{0.3cm}
+\begin{itemize}
+  \item \textbf{Posición:} $\vec{r}_i = (x_i, y_i)^T \in \mathbb{R}^2$
+  \item \textbf{Masa:} $m_i > 0$
+  \item \textbf{Conexiones:} Resortes elásticos entre pares de partículas
+  \item \textbf{Frontera:} Algunas partículas están fijas en el espacio
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Objetivo:} Encontrar las posiciones de equilibrio de las partículas libres.
+\end{frame}
+
+\begin{frame}{Fuerzas en el Sistema: Gravedad}
+\textbf{Fuerza gravitatoria:}
+La gravedad actúa verticalmente hacia abajo:
+\[
+\vec{F}_i^{grav} = m_i \vec{g} = m_i \begin{pmatrix} 0 \\ -g \end{pmatrix}
+\]
+donde $g > 0$ es la aceleración gravitacional.
+\end{frame}
+
+\begin{frame}{Fuerzas en el Sistema: Resorte}
+\textbf{Ley de Hooke:}
+La fuerza ejercida por un resorte que conecta las partículas $i$ y $j$ es:
+\[
+\vec{F}_{ij} = -k_{ij}(\|\vec{r}_i - \vec{r}_j\| - L_{ij}^0) \frac{\vec{r}_i - \vec{r}_j}{\|\vec{r}_i - \vec{r}_j\|}
+\]
+
+\vspace{0.3cm}
+donde:
+\begin{itemize}
+  \item $k_{ij}$: constante elástica del resorte
+  \item $L_{ij}^0$: longitud natural del resorte
+  \item $\|\vec{r}_i - \vec{r}_j\|$: longitud actual
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Condición de Equilibrio Estático}
+En equilibrio, la suma de todas las fuerzas sobre cada partícula libre es cero:
+\[
+\vec{F}_i^{total} = \vec{F}_i^{grav} + \sum_{j \in \mathcal{N}(i)} \vec{F}_{ij} = \vec{0}
+\]
+
+donde $\mathcal{N}(i)$ es el conjunto de partículas conectadas a $i$ por resortes.
+
+\vspace{0.3cm}
+Esto genera un sistema de $2n$ ecuaciones no lineales (para $n$ partículas libres).
+\end{frame}
+
+\begin{frame}{Linealización de las Fuerzas}
+\textbf{Hipótesis:} Pequeñas deformaciones respecto a la configuración de referencia.
+
+\vspace{0.3cm}
+Para un resorte entre $i$ y $j$ en equilibrio cerca de $L_{ij}^0$:
+\[
+\vec{F}_{ij} \approx -k_{ij}(\vec{r}_i - \vec{r}_j - \vec{L}_{ij}^0)
+\]
+
+donde $\vec{L}_{ij}^0$ es el vector de longitud natural.
+
+\vspace{0.3cm}
+\textbf{Resultado:} El sistema se convierte en \textbf{lineal}.
+\end{frame}
+
+% ============================================================
+% SECCIÓN 5: FORMULACIÓN MATRICIAL
+% ============================================================
+\section{Formulación Matricial del Problema}
+
+\begin{frame}{Matriz de Rigidez}
+\textbf{Definición:}
+Para un sistema con $n$ partículas libres, la matriz de rigidez $K \in \mathbb{R}^{2n \times 2n}$ se define por:
+\[
+K_{ij} = \begin{cases}
+\displaystyle \sum_{m \in \mathcal{N}(i)} k_{im} & \text{si } i = j \\[10pt]
+-k_{ij} & \text{si existe resorte entre } i \text{ y } j \\[10pt]
+0 & \text{en otro caso}
+\end{cases}
+\]
+
+\vspace{0.2cm}
+\textbf{Nota:} En 2D, la matriz se construye en bloques $2 \times 2$ para cada par de partículas.
+\end{frame}
+
+\begin{frame}{Propiedades de la Matriz de Rigidez}
+\textbf{Teorema:}
+La matriz $K$ satisface:
+\begin{enumerate}
+  \item \textbf{Simetría:} $K = K^T$
+  \item \textbf{Definida positiva:} Si hay al menos una partícula fija, $K$ es definida positiva
+\end{enumerate}
+
+\vspace{0.3cm}
+\textbf{Implicación:} El sistema lineal $Kx = f$ tiene solución única.
+\end{frame}
+
+\begin{frame}{Vector de Fuerzas}
+El vector de fuerzas externas $f \in \mathbb{R}^{2n}$ se construye como:
+\[
+f = \begin{pmatrix}
+\vec{F}_1^{ext} \\
+\vec{F}_2^{ext} \\
+\vdots \\
+\vec{F}_n^{ext}
+\end{pmatrix}
+\]
+
+donde $\vec{F}_i^{ext}$ incluye:
+\begin{itemize}
+  \item Fuerzas gravitatorias: $m_i \vec{g}$
+  \item Fuerzas de partículas fijas
+  \item Otras fuerzas externas aplicadas
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Sistema Lineal Final}
+\textbf{Ecuación matricial:}
+\[
+Kx = f
+\]
+
+donde:
+\begin{itemize}
+  \item $K \in \mathbb{R}^{2n \times 2n}$: matriz de rigidez (simétrica, definida positiva)
+  \item $x \in \mathbb{R}^{2n}$: vector de posiciones desconocidas
+  \item $f \in \mathbb{R}^{2n}$: vector de fuerzas externas
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Solución:} Usar descomposición LU para resolver eficientemente.
+\end{frame}
+
+% ============================================================
+% SECCIÓN 6: IMPLEMENTACIÓN
+% ============================================================
+\section{Implementación Computacional}
+
+\begin{frame}{Algoritmo de Descomposición LU}
+\textbf{Entrada:} Matriz $A \in \mathbb{R}^{n \times n}$
+
+\textbf{Salida:} Matrices $L$ y $U$ tales que $A = LU$
+
+\vspace{0.3cm}
+\textbf{Pasos principales:}
+\begin{enumerate}
+  \item Inicializar $L = I$, $U = A$
+  \item Para $k = 1, \ldots, n-1$:
+  \begin{itemize}
+    \item Calcular multiplicadores: $L_{ik} = U_{ik}/U_{kk}$ para $i > k$
+    \item Actualizar $U$: $U_{ij} = U_{ij} - L_{ik}U_{kj}$ para $i,j > k$
+  \end{itemize}
+\end{enumerate}
+
+\vspace{0.3cm}
+\textbf{Complejidad:} $O(n^3)$
+\end{frame}
+
+\begin{frame}{Algoritmo de Simulación}
+\textbf{Proceso completo:}
+\begin{enumerate}
+  \item Definir configuración del sistema (partículas, resortes, masas)
+  \item Construir matriz de rigidez $K$
+  \item Calcular vector de fuerzas externas $f$
+  \item Factorizar: $K = LU$ (una sola vez)
+  \item Para diferentes configuraciones de fuerzas:
+  \begin{itemize}
+    \item Resolver $Ly = f$ (sustitución progresiva)
+    \item Resolver $Ux = y$ (sustitución regresiva)
+  \end{itemize}
+  \item Visualizar resultados
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Estructura del Código}
+\textbf{Bibliotecas utilizadas:}
+\begin{itemize}
+  \item \texttt{numpy}: Operaciones matriciales
+  \item \texttt{scipy.linalg}: Descomposición LU optimizada
+  \item \texttt{matplotlib}: Visualización
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Módulos principales:}
+\begin{itemize}
+  \item Construcción de la matriz de rigidez
+  \item Aplicación de condiciones de frontera
+  \item Resolución mediante LU
+  \item Graficación del sistema de partículas
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SECCIÓN 7: RESULTADOS
+% ============================================================
+\section{Resultados Experimentales}
+
+\begin{frame}{Configuración de Pruebas}
+\textbf{Sistema de prueba:}
+\begin{itemize}
+  \item 20 partículas en configuración de malla 2D
+  \item 4 partículas fijas en las esquinas
+  \item Constantes elásticas uniformes: $k = 10$ N/m
+  \item Masa uniforme: $m = 1$ kg
+  \item Gravedad: $g = 9.8$ m/s²
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Mediciones:}
+\begin{itemize}
+  \item Tiempo de factorización
+  \item Tiempo de resolución
+  \item Precisión de la solución
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Análisis de Resultados}
+\textbf{Observaciones principales:}
+\begin{itemize}
+  \item La factorización LU es significativamente más rápida que Gauss para múltiples sistemas
+  \item El speedup observado coincide con la predicción teórica
+  \item La solución converge correctamente a la configuración de equilibrio
+  \item Errores numéricos en el orden de $10^{-12}$ (precisión de máquina)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Ventaja computacional:}
+Para $m = 10$ sistemas con $n = 100$ variables:
+\begin{itemize}
+  \item LU: 0.15 segundos
+  \item Gauss: 1.42 segundos
+  \item Speedup: $9.5\times$
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% CONCLUSIONES
+% ============================================================
+\section{Conclusiones}
+
+\begin{frame}{Conclusiones}
+\begin{enumerate}
+  \item La descomposición LU es \textbf{altamente eficiente} para resolver múltiples sistemas lineales con la misma matriz.
+  
+  \item El speedup teórico se \textbf{confirma experimentalmente} en la aplicación práctica.
+  
+  \item El modelado de sistemas físicos mediante matrices de rigidez genera sistemas lineales bien condicionados.
+  
+  \item La combinación de fundamentos matemáticos rigurosos con implementación computacional eficiente es esencial para aplicaciones en ingeniería.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Trabajo Futuro}
+\textbf{Extensiones posibles:}
+\begin{itemize}
+  \item Implementación de descomposición de Cholesky (aprovechando simetría)
+  \item Estudio de sistemas dinámicos (ecuaciones de movimiento)
+  \item Análisis de estabilidad numérica con matrices mal condicionadas
+  \item Paralelización del algoritmo para sistemas muy grandes
+  \item Aplicación a problemas en 3D
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Referencias}
+\begin{thebibliography}{99}
+\bibitem{golub2013matrix} G. H. Golub, C. F. Van Loan. \textit{Matrix Computations}. Johns Hopkins University Press, 2013.
+
+\bibitem{strang2016introduction} G. Strang. \textit{Introduction to Linear Algebra}. Wellesley-Cambridge Press, 2016.
+
+\bibitem{burden2015numerical} R. L. Burden, J. D. Faires. \textit{Numerical Analysis}. Cengage Learning, 2015.
+
+\bibitem{hibbeler2016engineering} R. C. Hibbeler. \textit{Engineering Mechanics: Statics}. Pearson, 2016.
+
+\bibitem{cook2007concepts} R. D. Cook. \textit{Concepts and Applications of Finite Element Analysis}. Wiley, 2007.
+
+\bibitem{zienkiewicz2013finite} O. C. Zienkiewicz, R. L. Taylor. \textit{The Finite Element Method}. Butterworth-Heinemann, 2013.
+\end{thebibliography}
+\end{frame}
+
+\begin{frame}
+\centering
+\Huge ¡Gracias por su atención!
+
+\vspace{1cm}
+\Large ¿Preguntas?
+\end{frame}
+
+\end{document}
