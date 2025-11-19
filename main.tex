@@ -10,6 +10,7 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{biblatex}
+\usepackage{xcolor}
 \addbibresource{referencias_completo.bib}
 \geometry{margin=2.5cm}
 
@@ -214,7 +215,7 @@ Total:
 \textbf{Sustitución regresiva} (\(Ux = y\)): Análogo, \(n^2\) operaciones.
 \end{proof}
 
-\subsection{Comparación LU vs Eliminación Gaussiana \cite{strang2016introduction} \cite{libretextsGauss}}
+\subsection{ \color{red}Comparación LU vs Eliminación Gaussiana \cite{strang2016introduction} \cite{libretextsGauss}}
 
 \begin{theorem}[Ventaja Computacional de LU]
 Para resolver \(m\) sistemas lineales \(Ax^{(k)} = b^{(k)}\), \(k = 1, \ldots, m\), con la misma matriz \(A\):
@@ -255,7 +256,7 @@ S(50, 60) = \frac{60}{1 + \frac{180}{50}} = \frac{60}{1 + 3.6} \approx 13.04
 En la práctica, por overheads, se observa \(S \approx 2\)-\(4\).
 \end{corollary}
 
-\section{Modelado Matemático del Sistema Físico \cite{hibbeler2016engineering} \cite{serway2014physics}}
+\section{\color{red} Modelado Matemático del Sistema Físico \cite{hibbeler2016engineering} \cite{serway2014physics}}
 
 \subsection{Descripción del Sistema}
 
@@ -336,14 +337,14 @@ Para \(|\vec{\delta}_j - \vec{\delta}_i| \ll L_{ij}^0\), expandimos:
 Sustituyendo en la ley de Hooke y simplificando, obtenemos la aproximación lineal.
 \end{proof}
 
-\section{Formulación Matricial del Problema \cite{cook2007concepts}}
+\section{\color{red} Formulación Matricial del Problema \cite{cook2007concepts}}
 
 \subsection{Construcción de la Matriz de Rigidez}
 
 \begin{definition}[Matriz de Rigidez \cite{wikipediaRigidez}]
 Para un sistema con \(n\) partículas libres, la \textbf{matriz de rigidez} \(K \in \matnn\) se define elemento a elemento como:
 \[
-k_{ij} = \begin{cases}
+K_{ij} = \begin{cases}
 \displaystyle \sum_{m \in \mathcal{N}(i)} k_{im} & \text{si } i = j \\[10pt]
 -k_{ij} & \text{si existe resorte entre } i \text{ y } j \\[10pt]
 0 & \text{en otro caso}
@@ -356,11 +357,11 @@ La matriz \(K\) satisface:
 \begin{enumerate}
 \item \textbf{Simetría}: \(K = K^T\)
 \item \textbf{Definida positiva}: Si hay al menos una partícula fija, \(K\) es definida positiva
-\item \textbf{Estructura sparse}: En mallas regulares, \(K\) tiene \(O(n)\) elementos no nulos
 \end{enumerate}
 \end{theorem}
 
 \begin{proof}
+	
 \textbf{(1) Simetría}: Por construcción, si existe resorte entre \(i\) y \(j\), entonces \(K_{ij} = K_{ji} = -k_{ij}\).
 
 \textbf{(2) Definida positividad}: Consideremos la energía potencial elástica total:
@@ -375,7 +376,6 @@ V \approx \frac{1}{2} \vec{x}^T K \vec{x} + \text{constante}
 
 Como \(V \geq 0\) y alcanza el mínimo solo en el equilibrio, \(K\) debe ser semidefinida positiva. La presencia de partículas fijas elimina los modos rígidos (traslaciones), haciendo \(K\) definida positiva.
 
-\textbf{(3) Sparsidad}: Cada partícula está conectada solo a sus vecinos inmediatos. En una malla regular 2D, cada partícula tiene \(\leq 8\) vecinos, por lo que cada fila de \(K\) tiene \(\leq 9\) elementos no nulos.
 \end{proof}
 
 \subsection{Vector de Fuerzas}
@@ -416,7 +416,7 @@ Reorganizando:
 Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
 \end{proof}
 
-\section{Implementación Computacional \cite{numpyDoc} \cite{numpySolve} \cite{scipyDoc} \cite{scipyLU} \cite{matplotlibDoc}}
+\section{ \color{green} Implementación Computacional \cite{numpyDoc} \cite{scipyLU} \cite{matplotlibDoc}}
 
 \subsection{Algoritmo de Descomposición LU}
 
@@ -492,7 +492,7 @@ El proyecto consta de tres módulos principales:
 \end{itemize}
 \end{enumerate}
 
-\section{Resultados Experimentales \cite{zienkiewicz2013finite}}
+\section{\color{green} Resultados Experimentales \cite{zienkiewicz2013finite}}
 
 \subsection{Configuración de Pruebas}
 
