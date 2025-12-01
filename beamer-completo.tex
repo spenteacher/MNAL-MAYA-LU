@@ -5,12 +5,12 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 
-\usetheme{Madrid}
+\usetheme{JuanLesPins}
 \usecolortheme{default}
 
 \title{Descomposición LU en Simulación Computacional}
 \subtitle{Fundamentos Teóricos y Aplicación a Sistemas de Partículas}
-\author{S. Zaragoza Pastor \and J. Hernández Barrero \and B. Liu \and A. Fernández García \and P. Botella Guillén}
+\author{S. Zaragoza Pastor \and J. Hernández Barrero \and B. Liu  \newline \and A. Fernández García \and P. Botella Guillén}
 \date{}
 
 \begin{document}
@@ -236,7 +236,7 @@ Consideramos un sistema de $N$ partículas puntuales en $\mathbb{R}^2$:
 
 \vspace{0.3cm}
 \begin{itemize}
-  \item \textbf{Posición:} $\vec{r}_i = (x_i, y_i)^T \in \mathbb{R}^2$
+  \item \textbf{Posición de la partícula}  \(i\): \(\vec{r}_i = (x_i, y_i)^T \in \mathbb{R}^2\)
   \item \textbf{Masa:} $m_i > 0$
   \item \textbf{Conexiones:} Resortes elásticos entre pares de partículas
   \item \textbf{Frontera:} Algunas partículas están fijas en el espacio
@@ -265,22 +265,33 @@ La fuerza ejercida por un resorte que conecta las partículas $i$ y $j$ es:
 \vspace{0.3cm}
 donde:
 \begin{itemize}
-  \item $k_{ij}$: constante elástica del resorte
-  \item $L_{ij}^0$: longitud natural del resorte
+  \item $k_{ij} > 0$: constante elástica del resorte
+  \item $L_{ij}^0 > 0$: longitud natural del resorte
   \item $\|\vec{r}_i - \vec{r}_j\|$: longitud actual
+  \item \(\hat{e}_{ij} = \frac{\vec{r}_j - \vec{r}_i}{|\vec{r}_j - \vec{r}_i|}\): Vector unitario de \(i\) hacia \(j\)
 \end{itemize}
+
+\begin{block}{Nota}
+	La fuerza \(\vec{F}_{ij}\) actúa sobre la partícula \(i\) en dirección \(i \to j\). Por la tercera ley de Newton:
+	\[
+	\vec{F}_{ji} = -\vec{F}_{ij}
+	\]
+\end{block}
+
 \end{frame}
 
 \begin{frame}{Condición de Equilibrio Estático}
-En equilibrio, la suma de todas las fuerzas sobre cada partícula libre es cero:
-\[
-\vec{F}_i^{total} = \vec{F}_i^{grav} + \sum_{j \in \mathcal{N}(i)} \vec{F}_{ij} = \vec{0}
-\]
+	
+\begin{block}{Equilibrio Estático}
+	Un sistema de partículas está en \textbf{equilibrio estático} si la fuerza total sobre cada partícula libre es nula:
+	\[
+	\vec{F}_i^{grav} + \sum_{j \in \mathcal{N}(i)} \vec{F}_{ij} = \vec{0} \quad \forall i \text{ libre}
+	\]
+	donde \(\mathcal{N}(i)\) es el conjunto de partículas conectadas a \(i\).
+\end{block}
 
-donde $\mathcal{N}(i)$ es el conjunto de partículas conectadas a $i$ por resortes.
 
 \vspace{0.3cm}
-Esto genera un sistema de $2n$ ecuaciones no lineales (para $n$ partículas libres).
 \end{frame}
 
 \begin{frame}{Linealización de las Fuerzas}
@@ -298,6 +309,20 @@ donde $\vec{L}_{ij}^0$ es el vector de longitud natural.
 \textbf{Resultado:} El sistema se convierte en \textbf{lineal}.
 \end{frame}
 
+\begin{frame}{Proof}
+	Sea \(\vec{\delta}_i = \vec{r}_i - \vec{r}_i^0\) el desplazamiento desde la posición de reposo. Entonces:
+	\[
+	|\vec{r}_j - \vec{r}_i| = |(\vec{r}_j^0 - \vec{r}_i^0) + (\vec{\delta}_j - \vec{\delta}_i)|
+	\]
+	
+	Para \(|\vec{\delta}_j - \vec{\delta}_i| \ll L_{ij}^0\), expandimos:
+	\[
+	|\vec{r}_j - \vec{r}_i| \approx L_{ij}^0 + \frac{(\vec{r}_j^0 - \vec{r}_i^0) \cdot (\vec{\delta}_j - \vec{\delta}_i)}{L_{ij}^0}
+	\]
+	
+	Sustituyendo en la ley de Hooke y simplificando, obtenemos la aproximación lineal.
+\end{frame}
+
 % ============================================================
 % SECCIÓN 5: FORMULACIÓN MATRICIAL
 % ============================================================
@@ -313,57 +338,72 @@ K_{ij} = \begin{cases}
 0 & \text{en otro caso}
 \end{cases}
 \]
-
 \vspace{0.2cm}
-\textbf{Nota:} En 2D, la matriz se construye en bloques $2 \times 2$ para cada par de partículas.
+
+\begin{block}{Propiedades}
+	\begin{enumerate}
+		\item \textbf{Simetría}: \(K = K^T\)
+		\item \textbf{Definida positiva}: Si hay al menos una partícula fija, \(K\) es definida positiva
+	\end{enumerate}
+\end{block}
+
 \end{frame}
 
-\begin{frame}{Propiedades de la Matriz de Rigidez}
-\textbf{Teorema:}
-La matriz $K$ satisface:
-\begin{enumerate}
-  \item \textbf{Simetría:} $K = K^T$
-  \item \textbf{Definida positiva:} Si hay al menos una partícula fija, $K$ es definida positiva
-\end{enumerate}
 
-\vspace{0.3cm}
-\textbf{Implicación:} El sistema lineal $Kx = f$ tiene solución única.
+\begin{frame}{Proof}
+	\textbf{(1) Simetría}: Por construcción, si existe resorte entre \(i\) y \(j\), entonces \(K_{ij} = K_{ji} = -k_{ij}\).
+	
+	\textbf{(2) Definida positividad}: Consideremos la energía potencial elástica total:
+	\[
+	V(\vec{x}) = \frac{1}{2} \sum_{\text{resortes } ij} k_{ij} (|\vec{r}_j - \vec{r}_i| - L_{ij}^0)^2
+	\]
+	
+	En la aproximación lineal:
+	\[
+	V \approx \frac{1}{2} \vec{x}^T K \vec{x} + \text{constante}
+	\]
+	
+	Como \(V \geq 0\) y alcanza el mínimo solo en el equilibrio, \(K\) debe ser semidefinida positiva. La presencia de partículas fijas elimina los modos rígidos (traslaciones), haciendo \(K\) definida positiva.
 \end{frame}
+
 
 \begin{frame}{Vector de Fuerzas}
-El vector de fuerzas externas $f \in \mathbb{R}^{2n}$ se construye como:
-\[
-f = \begin{pmatrix}
-\vec{F}_1^{ext} \\
-\vec{F}_2^{ext} \\
-\vdots \\
-\vec{F}_n^{ext}
-\end{pmatrix}
-\]
+\begin{definition}[Vector de Términos Independientes]
+	El vector \(\vec{f} \in \mathbb{R}^n\) se construye como:
+	\[
+	\vec{f} = K \vec{x}^0 + \vec{F}^{ext}
+	\]
+	donde:
+	\begin{itemize}
+		\item \(\vec{x}^0\): Vector de posiciones de reposo
+		\item \(\vec{F}^{ext}\): Fuerzas externas (gravedad)
+	\end{itemize}
+\end{definition}
 
-donde $\vec{F}_i^{ext}$ incluye:
-\begin{itemize}
-  \item Fuerzas gravitatorias: $m_i \vec{g}$
-  \item Fuerzas de partículas fijas
-  \item Otras fuerzas externas aplicadas
-\end{itemize}
 \end{frame}
 
 \begin{frame}{Sistema Lineal Final}
-\textbf{Ecuación matricial:}
-\[
-Kx = f
-\]
+\begin{theorem}[Formulación del Equilibrio como Sistema Lineal]
+	Las posiciones de equilibrio \(\vec{x}_{eq}\) del sistema satisfacen:
+	\[
+	K \vec{x}_{eq} = \vec{f}
+	\]
+	Este sistema se resuelve independientemente para cada coordenada espacial.
+\end{theorem}
+\end{frame}
 
-donde:
-\begin{itemize}
-  \item $K \in \mathbb{R}^{2n \times 2n}$: matriz de rigidez (simétrica, definida positiva)
-  \item $x \in \mathbb{R}^{2n}$: vector de posiciones desconocidas
-  \item $f \in \mathbb{R}^{2n}$: vector de fuerzas externas
-\end{itemize}
-
-\vspace{0.3cm}
-\textbf{Solución:} Usar descomposición LU para resolver eficientemente.
+\begin{frame}{Proof}
+	Por la condición de equilibrio y la linealización:
+	\[
+	\sum_{j \in \mathcal{N}(i)} k_{ij} [(\vec{r}_j - \vec{r}_i) - (\vec{r}_j^0 - \vec{r}_i^0)] + \vec{F}_i^{ext} = \vec{0}
+	\]
+	
+	Reorganizando:
+	\[
+	\sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j - \vec{r}_i) = \sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j^0 - \vec{r}_i^0) + \vec{F}_i^{ext}
+	\]
+	
+	Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
 \end{frame}
 
 % ============================================================
@@ -473,18 +513,6 @@ Para $m = 10$ sistemas con $n = 100$ variables:
 % ============================================================
 \section{Conclusiones}
 
-\begin{frame}{Conclusiones}
-\begin{enumerate}
-  \item La descomposición LU es \textbf{altamente eficiente} para resolver múltiples sistemas lineales con la misma matriz.
-  
-  \item El speedup teórico se \textbf{confirma experimentalmente} en la aplicación práctica.
-  
-  \item El modelado de sistemas físicos mediante matrices de rigidez genera sistemas lineales bien condicionados.
-  
-  \item La combinación de fundamentos matemáticos rigurosos con implementación computacional eficiente es esencial para aplicaciones en ingeniería.
-\end{enumerate}
-\end{frame}
-
 \begin{frame}{Trabajo Futuro}
 \textbf{Extensiones posibles:}
 \begin{itemize}
@@ -496,21 +524,6 @@ Para $m = 10$ sistemas con $n = 100$ variables:
 \end{itemize}
 \end{frame}
 
-\begin{frame}[allowframebreaks]{Referencias}
-\begin{thebibliography}{99}
-\bibitem{golub2013matrix} G. H. Golub, C. F. Van Loan. \textit{Matrix Computations}. Johns Hopkins University Press, 2013.
-
-\bibitem{strang2016introduction} G. Strang. \textit{Introduction to Linear Algebra}. Wellesley-Cambridge Press, 2016.
-
-\bibitem{burden2015numerical} R. L. Burden, J. D. Faires. \textit{Numerical Analysis}. Cengage Learning, 2015.
-
-\bibitem{hibbeler2016engineering} R. C. Hibbeler. \textit{Engineering Mechanics: Statics}. Pearson, 2016.
-
-\bibitem{cook2007concepts} R. D. Cook. \textit{Concepts and Applications of Finite Element Analysis}. Wiley, 2007.
-
-\bibitem{zienkiewicz2013finite} O. C. Zienkiewicz, R. L. Taylor. \textit{The Finite Element Method}. Butterworth-Heinemann, 2013.
-\end{thebibliography}
-\end{frame}
 
 \begin{frame}
 \centering
