@@ -411,25 +411,6 @@ K_{ij} = \begin{cases}
 % ============================================================
 \section{Implementación Computacional}
 
-\begin{frame}{Algoritmo de Descomposición LU}
-\textbf{Entrada:} Matriz $A \in \mathbb{R}^{n \times n}$
-
-\textbf{Salida:} Matrices $L$ y $U$ tales que $A = LU$
-
-\vspace{0.3cm}
-\textbf{Pasos principales:}
-\begin{enumerate}
-  \item Inicializar $L = I$, $U = A$
-  \item Para $k = 1, \ldots, n-1$:
-  \begin{itemize}
-    \item Calcular multiplicadores: $L_{ik} = U_{ik}/U_{kk}$ para $i > k$
-    \item Actualizar $U$: $U_{ij} = U_{ij} - L_{ik}U_{kj}$ para $i,j > k$
-  \end{itemize}
-\end{enumerate}
-
-\vspace{0.3cm}
-\textbf{Complejidad:} $O(n^3)$
-\end{frame}
 
 \begin{frame}{Algoritmo de Simulación}
 \textbf{Proceso completo:}
@@ -448,82 +429,13 @@ K_{ij} = \begin{cases}
 \end{frame}
 
 \begin{frame}{Estructura del Código}
-\textbf{Bibliotecas utilizadas:}
-\begin{itemize}
-  \item \texttt{numpy}: Operaciones matriciales
-  \item \texttt{scipy.linalg}: Descomposición LU optimizada
-  \item \texttt{matplotlib}: Visualización
-\end{itemize}
-
-\vspace{0.3cm}
-\textbf{Módulos principales:}
-\begin{itemize}
-  \item Construcción de la matriz de rigidez
-  \item Aplicación de condiciones de frontera
-  \item Resolución mediante LU
-  \item Graficación del sistema de partículas
-\end{itemize}
+	\textbf{Módulos:}
+	\begin{itemize}
+		\item \texttt{mainsimple.py}: Interfaz gráfica y preparación del sistema
+		\item \texttt{physicssimple.py}: Aplicación de las fuerzas al sistema de partículas
+		\item \texttt{lusolver.py}: Algoritmo LU y Gauss clásico
+	\end{itemize}
 \end{frame}
-
-% ============================================================
-% SECCIÓN 7: RESULTADOS
-% ============================================================
-\section{Resultados Experimentales}
-
-\begin{frame}{Configuración de Pruebas}
-\textbf{Sistema de prueba:}
-\begin{itemize}
-  \item 20 partículas en configuración de malla 2D
-  \item 4 partículas fijas en las esquinas
-  \item Constantes elásticas uniformes: $k = 10$ N/m
-  \item Masa uniforme: $m = 1$ kg
-  \item Gravedad: $g = 9.8$ m/s²
-\end{itemize}
-
-\vspace{0.3cm}
-\textbf{Mediciones:}
-\begin{itemize}
-  \item Tiempo de factorización
-  \item Tiempo de resolución
-  \item Precisión de la solución
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Análisis de Resultados}
-\textbf{Observaciones principales:}
-\begin{itemize}
-  \item La factorización LU es significativamente más rápida que Gauss para múltiples sistemas
-  \item El speedup observado coincide con la predicción teórica
-  \item La solución converge correctamente a la configuración de equilibrio
-  \item Errores numéricos en el orden de $10^{-12}$ (precisión de máquina)
-\end{itemize}
-
-\vspace{0.3cm}
-\textbf{Ventaja computacional:}
-Para $m = 10$ sistemas con $n = 100$ variables:
-\begin{itemize}
-  \item LU: 0.15 segundos
-  \item Gauss: 1.42 segundos
-  \item Speedup: $9.5\times$
-\end{itemize}
-\end{frame}
-
-% ============================================================
-% CONCLUSIONES
-% ============================================================
-\section{Conclusiones}
-
-\begin{frame}{Trabajo Futuro}
-\textbf{Extensiones posibles:}
-\begin{itemize}
-  \item Implementación de descomposición de Cholesky (aprovechando simetría)
-  \item Estudio de sistemas dinámicos (ecuaciones de movimiento)
-  \item Análisis de estabilidad numérica con matrices mal condicionadas
-  \item Paralelización del algoritmo para sistemas muy grandes
-  \item Aplicación a problemas en 3D
-\end{itemize}
-\end{frame}
-
 
 \begin{frame}
 \centering
