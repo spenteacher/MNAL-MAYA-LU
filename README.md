@@ -52,11 +52,3 @@ Matriz 50x50:
   Speedup:   8.78x  ← AQUÍ ESTÁ LA VENTAJA
 ==================================================
 ```
-
-## Compilar LaTeX
-
-```bash
-pdflatex informe-final.tex
-```
-
-El documento explica todo el fundamento teórico y muestra por qué LU es superior.
