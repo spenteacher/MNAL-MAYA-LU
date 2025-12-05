@@ -57,7 +57,18 @@ La resolución de sistemas lineales $Ax = b$ es fundamental en álgebra lineal c
 % ============================================================
 \section{Fundamentos Teóricos de la Descomposición LU}
 
-
+\begin{frame}{Descomposición LU}
+	\textbf{Definición:}
+	Una matriz $A \in \mathbb{R}^{n \times n}$ admite una \textbf{descomposición LU} si existen matrices:
+	\begin{itemize}
+		\item $L$ triangular inferior con $L_{ii} = 1$ para todo $i$
+		\item $U$ triangular superior
+	\end{itemize}
+	tales que:
+	\[
+	A = LU
+	\]
+\end{frame}
 
 \begin{frame}{Matriz de Permutación}
 Para evitar dividir por cero en alguna iteración, usamos \textbf{pivoteo parcial}.
@@ -343,10 +354,12 @@ K_{ij} = \begin{cases}
 
 \begin{frame}
 \centering
-\Huge ¡Gracias por su atención!
+\Huge \textbf{¡Gracias por su atención!}
 
-\vspace{1cm}
-\Large ¿Preguntas?
+
+\includegraphics[width=4cm]{qr-codef.png}
+\includegraphics{gplv3.png}
+
 \end{frame}
 
 \end{document}

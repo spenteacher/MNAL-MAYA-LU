@@ -3,11 +3,13 @@ Simulador de Equilibrio - Descomposición LU
 VERSIÓN CORREGIDA: Física visual con comparación LU vs Gauss
 """
 
-import pygame
-import numpy as np
 import sys
-from physics_simple import EquilibriumSystem
+
+import numpy as np
+import pygame
+
 from lu_solver import benchmark_solvers
+from physics_simple import EquilibriumSystem
 
 WIDTH, HEIGHT = 1200, 700
 FPS = 60
@@ -50,12 +52,12 @@ class Simulator:
         """Crear escena"""
         # LU (izquierda)
         self.system_lu.create_grid(
-            start_x=100, start_y=100, rows=6, cols=10, spacing=35, k=100.0, fix_top=True
+            start_x=100, start_y=100, rows=7, cols=7, spacing=35, k=100.0, fix_top=True
         )
 
         # Gauss (derecha)
         self.system_gauss.create_grid(
-            start_x=650, start_y=100, rows=6, cols=10, spacing=35, k=100.0, fix_top=True
+            start_x=650, start_y=100, rows=7, cols=7, spacing=35, k=100.0, fix_top=True
         )
 
     def handle_events(self):
@@ -260,7 +262,6 @@ class Simulator:
             num_points = min(50, len(self.frame_times_lu))
             lu_data = self.frame_times_lu[-num_points:]
             gauss_data = self.frame_times_gauss[-num_points:]
-            
 
             # Escala FIJA: siempre usar 5ms como máximo
             max_val = 5.0  # Escala fija en milisegundos
@@ -280,7 +281,7 @@ class Simulator:
                     # el /3 es para poner en la misma posición los x de lu y gauss
                     graph_y
                     + graph_height
-                    - min(gauss_data[i] / max_val, 3.0) * graph_height  / 2.80
+                    - min(gauss_data[i] / max_val, 3.0) * graph_height / 2.80
                 )
 
                 points_lu.append((x_pos, y_lu))
@@ -301,7 +302,7 @@ class Simulator:
         print("BENCHMARK - LU vs GAUSS")
         print("=" * 50)
 
-        for n in [10, 20, 30, 50]:
+        for n in [10, 20, 30, 50, 100]:
             print(f"\nMatriz {n}x{n}:")
             results = benchmark_solvers(n, num_solves=100)
             print(f"  LU decomp: {results['lu_decomp_time'] * 1000:.2f} ms")
