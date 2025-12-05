@@ -57,55 +57,6 @@ La resolución de sistemas lineales $Ax = b$ es fundamental en álgebra lineal c
 % ============================================================
 \section{Fundamentos Teóricos de la Descomposición LU}
 
-\begin{frame}{Matriz Triangular Inferior}
-\textbf{Definición:}
-Una matriz $L \in \mathbb{R}^{n \times n}$ es \textbf{triangular inferior} si:
-\[
-L_{ij} = 0 \quad \text{para todo } i < j
-\]
-
-\textbf{Forma:}
-\[
-L = \begin{pmatrix}
-l_{11} & 0 & 0 & \cdots & 0 \\
-l_{21} & l_{22} & 0 & \cdots & 0 \\
-\vdots & \vdots & \ddots & \ddots & \vdots \\
-l_{n1} & l_{n2} & \cdots & l_{n,n-1} & l_{nn}
-\end{pmatrix}
-\]
-\end{frame}
-
-\begin{frame}{Matriz Triangular Superior}
-\textbf{Definición:}
-Una matriz $U \in \mathbb{R}^{n \times n}$ es \textbf{triangular superior} si:
-\[
-U_{ij} = 0 \quad \text{para todo } i > j
-\]
-
-\textbf{Forma:}
-\[
-U = \begin{pmatrix}
-u_{11} & u_{12} & u_{13} & \cdots & u_{1n} \\
-0 & u_{22} & u_{23} & \cdots & u_{2n} \\
-\vdots & \ddots & \ddots & \ddots & \vdots \\
-0 & \cdots & 0 & u_{n-1,n-1} & u_{n-1,n} \\
-0 & \cdots & \cdots & 0 & u_{nn}
-\end{pmatrix}
-\]
-\end{frame}
-
-\begin{frame}{Descomposición LU}
-\textbf{Definición:}
-Una matriz $A \in \mathbb{R}^{n \times n}$ admite una \textbf{descomposición LU} si existen matrices:
-\begin{itemize}
-  \item $L$ triangular inferior con $L_{ii} = 1$ para todo $i$
-  \item $U$ triangular superior
-\end{itemize}
-tales que:
-\[
-A = LU
-\]
-\end{frame}
 
 
 \begin{frame}{Matriz de Permutación}
@@ -139,7 +90,7 @@ PA = LU
 donde $L$ es triangular inferior unitaria y $U$ es triangular superior.
 
 \vspace{0.3cm}
-\textbf{Ventaja:} Mejora la estabilidad numérica al evitar divisiones por elementos muy pequeños.
+\textbf{Ventaja:} Mejora la estabilidad numérica al evitar divisiones por elementos muy pequeños o cero.
 
 \vspace{0.3cm}
 \textbf{Corolario:} Para toda matriz definida positiva, se puede llevar a cabo la descomposición LU con pivoteo parcial.
