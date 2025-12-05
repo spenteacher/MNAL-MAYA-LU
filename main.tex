@@ -97,6 +97,10 @@ donde \(L\) es triangular inferior unitaria y \(U\) es triangular superior.
 	Una matriz \(A \in \matnn\) es una \textbf{matriz semidefinida positiva} si \(\forall x \in \matn \setminus\{0\}, x^tAx\geq0\).
 \end{definition}
 
+\begin{definition}[Matriz definida positiva]
+	Una matriz \(A \in \matnn\) es una \textbf{matriz definida positiva} si \(\forall x \in \matn \setminus\{0\}, x^tAx > 0. \)
+\end{definition}
+
 \subsection{Descomposición LU \cite{libretextsLU} \cite{wikipediaLU}}
 
 Sea \(A^{(0)} = A\in \matnn\), denotaremos al multiplicador \(i,j\)-ésimo como \(\alpha_{i,j}=-\frac{a_{ij}^{(j-1)}}{a_{jj}^{(j-1)}}\). Basándose en la descomposición gaussiana, el algoritmo de la descomposición LU consiste en:
@@ -122,7 +126,7 @@ y \(e_j\) y \(e_k\) son los vectores de la base canónica de \(\matn\).
 
 \subsection{Descomposición LU con Pivoteo Parcial \cite{watkins2010fundamentals}}
 
-Para garantizar la existencia de la descomposición para cualquier matriz invertible (no solo aquellas con menores principales no singulares), se introduce el pivoteo.
+Para garantizar la existencia de la descomposición para cualquier matriz invertible , se introduce el pivoteo.
 
 \begin{definition}[Matriz de Permutación]
 Una matriz \(P \in \matnn\) es una \textbf{matriz de permutación} si cada fila y cada columna contiene exactamente un 1 y los demás elementos son 0.
@@ -144,7 +148,7 @@ El algoritmo de eliminación gaussiana con pivoteo parcial consiste en:
 \item Aplicar eliminación gaussiana.
 \end{enumerate}
 
-Los intercambios de filas se acumulan en la matriz de permutación \(P\). El pivoteo garantiza estabilidad numérica y existencia incluso cuando los menores principales sean nulos.
+Los intercambios de filas se acumulan en la matriz de permutación \(P\). El pivoteo garantiza estabilidad numérica evitando dividir entre 0 o números muy pequeños.
 \end{proof}
 
 \section{Análisis de Complejidad Computacional \cite{burden2015numerical} }
@@ -223,18 +227,18 @@ Para resolver \(m\) sistemas lineales \(Ax^{(k)} = b^{(k)}\), \(k = 1, \ldots, m
 \begin{itemize}
 \item \textbf{Descomposición LU}:
 \[
-T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
+T_{LU}(n,m) = \frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +  m \cdot 2n^2 \approx  \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
 \]
 
 \item \textbf{Eliminación Gaussiana repetida}:
 \[
-T_{Gauss}(n,m) = m \cdot \frac{2n^3}{3} + O(mn^2)
+T_{Gauss}(n,m) = m(\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +n^2) \approx m \cdot \frac{2n^3}{3} + O(mn^2)
 \]
 \end{itemize}
 
 El \textbf{speedup} es:
 \[
-S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m \cdot \frac{2n^3}{3}}{\frac{2n^3}{3} + m \cdot 2n^2} = \frac{m}{1 + \frac{3m}{n}}
+S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m(\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +n^2)}{\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +  m \cdot 2n^2} \approx \frac{m}{1 + \frac{3m}{n}}
 \]
 \end{theorem}
 
@@ -253,7 +257,6 @@ En simulaciones a 60 fps durante 1 segundo (\(m = 60\)) con \(n = 50\):
 S(50, 60) = \frac{60}{1 + \frac{180}{50}} = \frac{60}{1 + 3.6} \approx 13.04
 \]
 
-En la práctica, por overheads, se observa \(S \approx 2\)-\(4\).
 \end{corollary}
 
 \section{\color{red} Modelado Matemático del Sistema Físico \cite{hibbeler2016engineering} \cite{serway2014physics}}
@@ -352,6 +355,10 @@ K_{ij} = \begin{cases}
 \]
 \end{definition}
 
+\begin{remark}
+	En nuestro proyecto y y programa en la práctica se aproxima la matriz de Rigidez a una matriz de un sistema unidimensional, luego podemos asociar una componente en función de la otra.
+\end{remark}
+
 \begin{theorem}[Propiedades de la Matriz de Rigidez]
 La matriz \(K\) satisface:
 \begin{enumerate}
@@ -397,7 +404,7 @@ donde:
 \begin{theorem}[Formulación del Equilibrio como Sistema Lineal]
 Las posiciones de equilibrio \(\vec{x}_{eq}\) del sistema satisfacen:
 \[
-K \vec{x}_{eq} = \vec{f}
+K \vec{x}_{eq} = \vec{F}^{ext}
 \]
 Este sistema se resuelve independientemente para cada coordenada espacial.
 \end{theorem}
@@ -413,7 +420,7 @@ Reorganizando:
 \sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j - \vec{r}_i) = \sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j^0 - \vec{r}_i^0) + \vec{F}_i^{ext}
 \]
 
-Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
+Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{F}^{ext}\).
 \end{proof}
 
 \section{ \color{green} Implementación Computacional \cite{numpyDoc} \cite{scipyLU} \cite{matplotlibDoc}}
@@ -499,21 +506,21 @@ El proyecto consta de tres módulos principales:
 Se ejecutaron benchmarks con matrices de diferentes tamaños, resolviendo 100 sistemas con la misma matriz \(K\) pero diferentes vectores \(\vec{f}\).
 
 \begin{table}[H]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-\textbf{Tamaño \(n\)} & \textbf{LU Decomp.} & \textbf{LU Solve} & \textbf{Gauss Total} & \textbf{Speedup} \\
-\hline
-\(10 \times 10\) & 0.08 ms & 0.021 ms & 0.15 ms & 1.52x \\
-\(20 \times 20\) & 0.31 ms & 0.082 ms & 0.61 ms & 1.83x \\
-\(30 \times 30\) & 0.67 ms & 0.184 ms & 1.35 ms & 2.11x \\
-\(50 \times 50\) & 1.89 ms & 0.521 ms & 4.73 ms & 2.53x \\
-\(70 \times 70\) & 4.12 ms & 1.053 ms & 10.8 ms & 2.87x \\
-\(100 \times 100\) & 11.2 ms & 2.341 ms & 34.5 ms & 3.21x \\
-\hline
-\end{tabular}
-\caption{Tiempos promedio para 100 resoluciones del sistema. La descomposición LU se realiza una sola vez; LU Solve es el promedio de las 100 resoluciones subsecuentes.}
-\label{tab:benchmark}
+	\centering
+	
+	\begin{tabular}{ccccccc}
+		\hline
+		\textbf{Tamaño} & \textbf{LU Decomp (ms)} & \textbf{LU Solve (ms)} & \textbf{LU Total (ms)} & \textbf{Gauss (ms)} & \textbf{Speedup} \\ 
+		\hline
+		10x10  & 0.22  & 0.039 & 4.07  & 19.01   & 4.66x  \\
+		20x20  & 0.61  & 0.085 & 9.11  & 56.58   & 6.21x  \\
+		30x30  & 1.14  & 0.104 & 11.52 & 114.23  & 9.92x  \\
+		50x50  & 4.39  & 0.149 & 19.28 & 306.89  & 15.92x \\
+		100x100 & 12.95 & 0.299 & 42.88 & 1220.97 & 28.48x \\
+		\hline
+	\end{tabular}
+	\caption{Comparación de tiempos entre métodos LU y Gauss}
+	\label{tab:lu_vs_gauss}
 \end{table}
 
 \subsection{Análisis de Resultados}
@@ -523,18 +530,19 @@ Se ejecutaron benchmarks con matrices de diferentes tamaños, resolviendo 100 si
 
 \textbf{\textit{Nótese:}} Estos resultados son usando nuestra subrutina de Benchmark. Es decir que no se han realizado con mallas de tales tallas por no hacer más complicada la implementación del programa gráfica
 
-\item \textbf{Speedup creciente}: El speedup aumenta con \(n\), alcanzando 3.21x para \(n = 100\). Esto se debe a que el término \(O(n^3)\) de la factorización se amortiza mejor para sistemas grandes.
+\item \textbf{Speedup creciente}: El speedup aumenta con \(n\), alcanzando 28,48x para \(n = 100\). Esto se debe a que el término \(O(n^3)\) de la factorización se amortiza mejor para sistemas grandes.
 
-\item \textbf{Predicción teórica vs experimental}: Para \(n = 50\), \(m = 100\):
+\item \textbf{Predicción teórica vs experimental}: Para \(n = 100\), \(m = 100\):
 \[
- \textbf{teorico} = \frac{100}{1 + \frac{300}{50}} = \frac{100}{7} \approx 14.3
+ \textbf{teorico} = \frac{100}{1 + \frac{300}{100}} = \frac{100}{7} = 25 \approx 28,48
 \]
 
-El valor experimental (2.53x) es menor debido a:
+El valor experimental varía respecto del teorico
 \begin{itemize}
 \item Overheads de gestión de memoria
 \item Construcción de la matriz \(K\) (no contabilizada en el análisis teórico)
 \item Operaciones de punto flotante de bajo nivel
+\item Optimizaciones del cálculo de matrices por parte de Numpy
 \end{itemize}
 
 

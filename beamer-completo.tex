@@ -107,23 +107,9 @@ A = LU
 \]
 \end{frame}
 
-\begin{frame}{Existencia y Unicidad}
-\textbf{Teorema:}
-Sea $A \in \mathbb{R}^{n \times n}$. Si todos los menores principales de $A$ son no singulares, entonces existe una única descomposición $A = LU$ con $L$ triangular inferior unitaria y $U$ triangular superior.
-
-\vspace{0.3cm}
-\textbf{Menor principal de orden $k$:}
-\[
-A_k = \begin{pmatrix}
-a_{11} & \cdots & a_{1k} \\
-\vdots & \ddots & \vdots \\
-a_{k1} & \cdots & a_{kk}
-\end{pmatrix}
-\]
-\end{frame}
 
 \begin{frame}{Matriz de Permutación}
-Cuando la condición de menores principales no se cumple, usamos \textbf{pivoteo parcial}.
+Para evitar dividir por cero en alguna iteración, usamos \textbf{pivoteo parcial}.
 
 \vspace{0.3cm}
 \textbf{Definición:} Una matriz $P \in \mathbb{R}^{n \times n}$ es de permutación si:
@@ -154,6 +140,10 @@ donde $L$ es triangular inferior unitaria y $U$ es triangular superior.
 
 \vspace{0.3cm}
 \textbf{Ventaja:} Mejora la estabilidad numérica al evitar divisiones por elementos muy pequeños.
+
+\vspace{0.3cm}
+\textbf{Corolario:} Para toda matriz definida positiva, se puede llevar a cabo la descomposición LU con pivoteo parcial.
+
 \end{frame}
 
 % ============================================================
@@ -195,36 +185,28 @@ Resolver dos sistemas triangulares (sustitución progresiva y regresiva) requier
 \end{frame}
 
 \begin{frame}{Comparación LU vs Eliminación Gaussiana}
-\textbf{Problema:} Resolver $m$ sistemas $Ax^{(k)} = b^{(k)}$ con la misma matriz $A$.
+\textbf{Problema:} Resolver $m$ sistemas $Ax = b$ con la misma matriz $A$.
 
 \vspace{0.3cm}
 \begin{block}{Descomposición LU}
 \[
-T_{LU}(n,m) = \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
+T_{LU}(n,m) = \frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +  m \cdot 2n^2 \approx  \frac{2n^3}{3} + m \cdot 2n^2 + O(n^2)
 \]
 \end{block}
 
 \begin{block}{Eliminación Gaussiana repetida}
 \[
-T_{Gauss}(n,m) = m \cdot \frac{2n^3}{3} + O(mn^2)
+T_{Gauss}(n,m) = m(\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +n^2) \approx m \cdot \frac{2n^3}{3} + O(mn^2)
 \]
 \end{block}
-\end{frame}
 
-\begin{frame}{Speedup de la Descomposición LU}
 \textbf{Factor de aceleración:}
 \[
-S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m \cdot \frac{2n^3}{3}}{\frac{2n^3}{3} + m \cdot 2n^2} = \frac{m}{1 + \frac{3m}{n}}
+S(n,m) = \frac{T_{Gauss}}{T_{LU}} = \frac{m(\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +n^2)}{\frac{2n^3}{3} - \frac{n^2}{2} - \frac{n}{6} +  m \cdot 2n^2} \approx \frac{m}{1 + \frac{3m}{n}}
 \]
 
-\vspace{0.3cm}
-\textbf{Análisis:}
-\begin{itemize}
-  \item Si $m \ll n$: $S \approx m$ (speedup lineal en $m$)
-  \item Si $m \gg n$: $S \approx \frac{n}{3}$ (speedup limitado por $n$)
-  \item Para $n = 1000$, $m = 10$: $S \approx 9.7$ (cerca de 10x más rápido)
-\end{itemize}
 \end{frame}
+
 
 % ============================================================
 % SECCIÓN 4: MODELADO MATEMÁTICO
@@ -347,6 +329,7 @@ K_{ij} = \begin{cases}
 	\end{enumerate}
 \end{block}
 
+	\textbf{\textit{Nota: }}En nuestro proyecto y y programa en la práctica se aproxima la matriz de Rigidez a una matriz de un sistema unidimensional, luego podemos asociar una componente en función de la otra.
 \end{frame}
 
 
@@ -386,47 +369,17 @@ K_{ij} = \begin{cases}
 \begin{theorem}[Formulación del Equilibrio como Sistema Lineal]
 	Las posiciones de equilibrio \(\vec{x}_{eq}\) del sistema satisfacen:
 	\[
-	K \vec{x}_{eq} = \vec{f}
+	K \vec{x}_{eq} = \vec{F}^{ext}
 	\]
 	Este sistema se resuelve independientemente para cada coordenada espacial.
 \end{theorem}
 \end{frame}
 
-\begin{frame}{Proof}
-	Por la condición de equilibrio y la linealización:
-	\[
-	\sum_{j \in \mathcal{N}(i)} k_{ij} [(\vec{r}_j - \vec{r}_i) - (\vec{r}_j^0 - \vec{r}_i^0)] + \vec{F}_i^{ext} = \vec{0}
-	\]
-	
-	Reorganizando:
-	\[
-	\sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j - \vec{r}_i) = \sum_{j \in \mathcal{N}(i)} k_{ij} (\vec{r}_j^0 - \vec{r}_i^0) + \vec{F}_i^{ext}
-	\]
-	
-	Esta es precisamente la fila \(i\) del sistema \(K\vec{x} = \vec{f}\).
-\end{frame}
 
 % ============================================================
 % SECCIÓN 6: IMPLEMENTACIÓN
 % ============================================================
 \section{Implementación Computacional}
-
-
-\begin{frame}{Algoritmo de Simulación}
-\textbf{Proceso completo:}
-\begin{enumerate}
-  \item Definir configuración del sistema (partículas, resortes, masas)
-  \item Construir matriz de rigidez $K$
-  \item Calcular vector de fuerzas externas $f$
-  \item Factorizar: $K = LU$ (una sola vez)
-  \item Para diferentes configuraciones de fuerzas:
-  \begin{itemize}
-    \item Resolver $Ly = f$ (sustitución progresiva)
-    \item Resolver $Ux = y$ (sustitución regresiva)
-  \end{itemize}
-  \item Visualizar resultados
-\end{enumerate}
-\end{frame}
 
 \begin{frame}{Estructura del Código}
 	\textbf{Módulos:}
