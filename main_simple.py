@@ -155,9 +155,9 @@ class Simulator:
         """Renderizar"""
         self.screen.fill(BG_COLOR)
 
-        self.draw_system(self.system_lu, "LU Decomposition", True, self.dragging)
+        self.draw_system(self.system_lu, "Descomposición LU", True, self.dragging)
         self.draw_system(
-            self.system_gauss, "Gaussian Elimination", False, self.dragging_gauss
+            self.system_gauss, "Eliminación Gaussiana", False, self.dragging_gauss
         )
 
         self.draw_ui()
@@ -248,8 +248,8 @@ class Simulator:
 
     def draw_performance_graph(self, y_offset):
         """Dibujar gráfica de rendimiento en tiempo real"""
-        graph_x, graph_y = 500, y_offset + 20
-        graph_width, graph_height = 250, 80
+        graph_x, graph_y = 465, y_offset + 25
+        graph_width, graph_height = 250 , 100
 
         # Fondo de la gráfica
         pygame.draw.rect(
@@ -258,30 +258,33 @@ class Simulator:
 
         # Si hay suficientes datos
         if len(self.frame_times_lu) > 1 and len(self.frame_times_gauss) > 1:
-            # Obtener los últmos 100 valores
+            # Obtener los últmos 50 valores
             num_points = min(50, len(self.frame_times_lu))
             lu_data = self.frame_times_lu[-num_points:]
             gauss_data = self.frame_times_gauss[-num_points:]
 
             # Escala FIJA: siempre usar 5ms como máximo
             max_val = 5.0  # Escala fija en milisegundos
-
+            margin_top = 25 # Margen para que las gráficas no solapen con el título
             # Crear puntos para las líneas
             points_lu = []
             points_gauss = []
             for i in range(num_points):
                 x_pos = graph_x + (i / num_points) * graph_width
+                
                 # Limitar valores para que no se salgan del recuadro del grafico
                 y_lu = (
                     graph_y
                     + graph_height
+                    + margin_top
                     - min(lu_data[i] / max_val, 1.0) * graph_height
                 )
                 y_gauss = (
-                    # el /3 es para poner en la misma posición los x de lu y gauss
+                    # el /5 es para poner en la misma posición los x de lu y gauss
                     graph_y
                     + graph_height
-                    - min(gauss_data[i] / max_val, 3.0) * graph_height / 2.80
+                    + margin_top
+                    - min(gauss_data[i] / max_val, 3.0) * graph_height / 5
                 )
 
                 points_lu.append((x_pos, y_lu))
@@ -293,8 +296,11 @@ class Simulator:
             if len(points_gauss) > 1:
                 pygame.draw.lines(self.screen, (255, 200, 100), False, points_gauss, 2)
 
-        label = self.font.render("Performance", True, TEXT_COLOR)
-        self.screen.blit(label, (graph_x + 5, graph_y + 5))
+            
+            
+        label = self.font.render("Rendimiento", True, TEXT_COLOR)
+        label_x = graph_x + (graph_width - label.get_width()) // 2
+        self.screen.blit(label, (label_x, graph_y + 5))
 
     def run_benchmark(self):
         """Benchmark"""
